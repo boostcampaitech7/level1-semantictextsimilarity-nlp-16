@@ -1,0 +1,17 @@
+program: train.py
+method: bayes
+metric:
+  name: validation_loss
+  goal: minimize
+parameters:
+  BATCH_SIZE:
+    values: [32, 64, 128]
+  MAX_LEN:
+    value: 128
+  LEARNING_RATE:
+    min: 0.0001
+    max: 0.1
+  EPOCHS:
+    values: [10, 15, 20]
+  MODEL_NAME:
+    value: 'intfloat/multilingual-e5-small'
