@@ -24,6 +24,7 @@ class STSModel(pl.LightningModule):
         emb_sen1 = self(batch['input_ids'][0], batch['attention_mask'][0])
         emb_sen2 = self(batch['input_ids'][1], batch['attention_mask'][1])
         similarity = self.cosine_similarity(emb_sen1, emb_sen2)
+        similarity = 2.5*similarity + 2.5
         loss = nn.MSELoss()(similarity, batch['labels'])
         self.log('train_loss', loss)
         return loss
