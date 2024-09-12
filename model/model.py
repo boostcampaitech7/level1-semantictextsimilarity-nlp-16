@@ -9,11 +9,12 @@ import wandb
 
 
 class STSModel(pl.LightningModule):
-    def __init__(self, model_name, lr):
+    def __init__(self, config):
         super().__init__()
-        self.mod = AutoModel.from_pretrained(model_name)
+        self.save_hyperparameters(config)
+        self.mod = AutoModel.from_pretrained(config['MODEL_NAME'])
         self.cosine_similarity = nn.CosineSimilarity(dim=1)
-        self.lr = lr
+        self.lr = config['LEARNING_RATE']
         
     def forward(self, input_ids, attention_mask):
         outputs = self.mod(input_ids=input_ids, attention_mask=attention_mask)
