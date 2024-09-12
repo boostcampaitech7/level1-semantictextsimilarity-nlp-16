@@ -11,7 +11,7 @@ import pandas as pd
 from pytorch_lightning import Trainer
 from data_loader.data_loaders import TextDataLoader
 from utils.tokenzier import get_tokenizer
-from utils.util import model_load()
+from utils.util import model_load
 
 
 def main(model, config):
