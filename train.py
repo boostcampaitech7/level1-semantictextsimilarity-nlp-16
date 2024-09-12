@@ -50,7 +50,7 @@ def main(config):
 
     checkpoint_callback = ModelCheckpoint(
         dirpath='saved',
-        filename=f'best-model-{datetime.datetime.now().strftime('%d%H%M')}',
+        filename=f'best-model-{datetime.datetime.now().strftime('%d%H%M%S')}',
         save_top_k=3,
         monitor='val_loss',
         mode='min'
