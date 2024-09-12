@@ -107,14 +107,15 @@ def model_load(
         model_path,
         project_name='Level1-STS'
         ):
-    wandb.init(project=project_name, name=run_name)
+    run = wandb.init(project=project_name, name=run_name)
+    config = run.config
 
     artifact = wandb.use_artifact(f"{project_name}/{model_path}:latest")
     model_dir = artifact.download(root='./saved')
 
     model = torch.load(f'{model_dir}/model.pth')
 
-    return model
+    return model, config
 
     
 def set_seed(seed):
