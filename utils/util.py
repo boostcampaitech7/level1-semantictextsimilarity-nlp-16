@@ -101,6 +101,21 @@ class WandbCheckpointCallback(pl.Callback):
                     trainer.logger.experiment.delete_artifact(artifact_to_delete.name)
                     # 새로운 모델 추가
                     self.best_k_models[self.metric_score] = artifact
+
+def model_load(
+        run_name,
+        model_path,
+        project_name='Level1-STS'
+        ):
+    wandb.init(project=project_name, name=run_name)
+
+    artifact = wandb.use_artifact(f"{project_name}/{model_path}:latest")
+    model_dir = artifact.download(root='./saved')
+
+    model = torch.load(f'{model_dir}/model.pth')
+
+    return model
+
     
 def set_seed(seed):
     random.seed(seed)
