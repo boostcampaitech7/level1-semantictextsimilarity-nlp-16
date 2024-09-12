@@ -1,6 +1,7 @@
 import json
 import torch
 import random
+import datetime
 import numpy as np
 import pandas as pd
 import wandb
@@ -85,7 +86,7 @@ class WandbCheckpointCallback(pl.Callback):
     def on_save_checkpoint(self, trainer, pl_module, checkpoint):
         if self.metric_score is not None:
             # Wandb에 체크포인트 업로드
-            artifact = wandb.Artifact(f"model-{trainer.current_epoch}", type="model")
+            artifact = wandb.Artifact(f'best-model-{datetime.datetime.now().strftime('%d%H%M')}', type="model")
             artifact.add_file(trainer.checkpoint_callback.best_model_path)
             trainer.logger.experiment.log_artifact(artifact)
 
