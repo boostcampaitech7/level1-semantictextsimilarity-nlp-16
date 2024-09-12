@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
 from transformers import AutoModel
-from sklearn.metrics import pearsonr
+from scipy.stats import pearsonr
 import wandb
 
 
