@@ -40,7 +40,7 @@ def main(config):
         truncation=True,
         batch_size=config['BATCH_SIZE']
     )
-    model = STSModel(config['MODEL_NAME'], config['LEARNING_RATE'])
+    model = STSModel(config)
 
     early_stop_callback = EarlyStopping(
         monitor='val_loss',
