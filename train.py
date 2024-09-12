@@ -58,8 +58,8 @@ def main(config):
 
     wandb_checkpoint_callback = WandbCheckpointCallback(top_k=3)
 
-    experiment = f'{config['MODEL_NAME']}-{datetime.datetime.now().strftime('%d%H%M')}'
-    wandb_logger = WandbLogger(name = experiment, project="Level1-STS")
+    run_name = f'{config['MODEL_NAME']}-{datetime.datetime.now().strftime('%d%H%M')}'
+    wandb_logger = WandbLogger(name = run_name, project="Level1-STS")
 
     trainer = Trainer(
         accelerator="gpu",
