@@ -36,10 +36,10 @@ class STSModel(pl.LightningModule):
         similarity = self.cosine_similarity(emb_sen1, emb_sen2)
         similarity = 2.5*similarity + 2.5
         loss = nn.MSELoss()(similarity, batch['labels'].squeeze())
-        pearson_corr, _ = pearsonr(batch['labels'], similarity)
+        # pearson_corr, _ = pearsonr(batch['labels'].cpu(), similarity.cpu())
         self.log('val_loss', loss)
-        self.log('val_pearson_corr', pearson_corr)
-        return {'val_loss': loss, 'val_pearson_corr': pearson_corr, 'predictions': similarity, 'targets': batch['labels']}
+        # self.log('val_pearson_corr', pearson_corr)
+        return {'val_loss': loss, 'predictions': similarity, 'targets': batch['labels']}
     
     def test_step(self, batch, batch_idx):
         emb_sen1 = self(batch['input_ids'][0].squeeze(), batch['attention_mask'][0].squeeze())
