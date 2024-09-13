@@ -36,24 +36,16 @@ class STSModel(pl.LightningModule):
         similarity = self.cosine_similarity(emb_sen1, emb_sen2)
         similarity = 2.5*similarity + 2.5
         loss = nn.MSELoss()(similarity, batch['labels'].squeeze())
+        pearson_corr, _ = pearsonr(batch['labels'], similarity)
         self.log('val_loss', loss)
-        return {'val_loss': loss, 'predictions': similarity, 'targets': batch['labels']}
-    
-    def on_validation_epoch_end(self, outputs):
-        predictions = torch.cat([x['predictions'] for x in outputs]).cpu().numpy()
-        targets = torch.cat([x['targets'] for x in outputs]).cpu().numpy()
-        pearson_corr, _ = pearsonr(targets, predictions)
         self.log('val_pearson_corr', pearson_corr)
+        return {'val_loss': loss, 'val_pearson_corr': pearson_corr, 'predictions': similarity, 'targets': batch['labels']}
     
     def test_step(self, batch, batch_idx):
         emb_sen1 = self(batch['input_ids'][0].squeeze(), batch['attention_mask'][0].squeeze())
         emb_sen2 = self(batch['input_ids'][1].squeeze(), batch['attention_mask'][1].squeeze())
         similarity = self.cosine_similarity(emb_sen1, emb_sen2)
         return {'predictions' : similarity}
-    
-    def test_epoch_end(self, outputs):
-        all_predictions = torch.cat([x['predictions'] for x in outputs]).cpu().numpy()
-        np.savetxt('test_predictions.txt', all_predictions)
         
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
