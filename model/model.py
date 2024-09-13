@@ -22,20 +22,20 @@ class STSModel(pl.LightningModule):
         return outputs.last_hidden_state[:, 0, :]
     
     def training_step(self, batch, batch_idx):
-        emb_sen1 = self(batch['input_ids'][0], batch['attention_mask'][0])
-        emb_sen2 = self(batch['input_ids'][1], batch['attention_mask'][1])
+        emb_sen1 = self(batch['input_ids'][0].squeeze(), batch['attention_mask'][0].squeeze())
+        emb_sen2 = self(batch['input_ids'][1].squeeze(), batch['attention_mask'][1].squeeze())
         similarity = self.cosine_similarity(emb_sen1, emb_sen2)
         similarity = 2.5*similarity + 2.5
-        loss = nn.MSELoss()(similarity, batch['labels'])
+        loss = nn.MSELoss()(similarity, batch['labels'].squeeze())
         self.log('train_loss', loss)
         return loss
     
     def validation_step(self, batch, batch_idx):
-        emb_sen1 = self(batch['input_ids'][0], batch['attention_mask'][0])
-        emb_sen2 = self(batch['input_ids'][1], batch['attention_mask'][1])
+        emb_sen1 = self(batch['input_ids'][0].squeeze(), batch['attention_mask'][0].squeeze())
+        emb_sen2 = self(batch['input_ids'][1].squeeze(), batch['attention_mask'][1].squeeze())
         similarity = self.cosine_similarity(emb_sen1, emb_sen2)
         similarity = 2.5*similarity + 2.5
-        loss = nn.MSELoss()(similarity, batch['labels'])
+        loss = nn.MSELoss()(similarity, batch['labels'].squeeze())
         self.log('val_loss', loss)
         return {'val_loss': loss, 'predictions': similarity, 'targets': batch['labels']}
     
@@ -46,8 +46,8 @@ class STSModel(pl.LightningModule):
         self.log('val_pearson_corr', pearson_corr)
     
     def test_step(self, batch, batch_idx):
-        emb_sen1 = self(batch['input_ids'][0], batch['attention_mask'][0])
-        emb_sen2 = self(batch['input_ids'][1], batch['attention_mask'][1])
+        emb_sen1 = self(batch['input_ids'][0].squeeze(), batch['attention_mask'][0].squeeze())
+        emb_sen2 = self(batch['input_ids'][1].squeeze(), batch['attention_mask'][1].squeeze())
         similarity = self.cosine_similarity(emb_sen1, emb_sen2)
         return {'predictions' : similarity}
     
