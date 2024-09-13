@@ -13,6 +13,7 @@ class STSModel(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters(config)
         self.mod = AutoModel.from_pretrained(config['MODEL_NAME'])
+        self.mod.train()
         self.cosine_similarity = nn.CosineSimilarity(dim=1)
         self.lr = config['LEARNING_RATE']
         
