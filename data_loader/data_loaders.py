@@ -14,7 +14,7 @@ class TextDataLoader(pl.LightningDataModule):
             truncation=True,
             batch_size = 32
             ):
-        super.__init__()
+        super().__init__()
         self.train_data = train_data
         self.dev_data = dev_data
         self.test_data = test_data
