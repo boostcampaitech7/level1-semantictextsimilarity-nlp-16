@@ -37,7 +37,7 @@ class STSModel(pl.LightningModule):
         self.log('val_loss', loss)
         return {'val_loss': loss, 'predictions': similarity, 'targets': batch['labels']}
     
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self, outputs):
         predictions = torch.cat([x['predictions'] for x in outputs]).cpu().numpy()
         targets = torch.cat([x['targets'] for x in outputs]).cpu().numpy()
         pearson_corr, _ = pearsonr(targets, predictions)
