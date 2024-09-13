@@ -50,7 +50,7 @@ class TextDataLoader(pl.LightningDataModule):
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
 
-    def dev_dataloader(self):
+    def val_dataloader(self):
         return DataLoader(self.dev_dataset, batch_size=self.batch_size)
     
     def test_dataloader(self):
