@@ -6,3 +6,4 @@ pytorch_lightning
 sckit-learn
 scipy
 transformers
+nltk
