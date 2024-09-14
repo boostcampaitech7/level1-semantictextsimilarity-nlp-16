@@ -15,32 +15,28 @@ class STSModel(pl.LightningModule):
         self.save_hyperparameters(config)
         self.mod = AutoModel.from_pretrained(config['MODEL_NAME'])
         self.mod.train()
-        self.cosine_similarity = nn.CosineSimilarity(dim=1)
+        self.dense = nn.Linear(384, 1)
+        self.sigmoid = nn.Sigmoid()
         self.lr = config['LEARNING_RATE']
         
     def forward(self, input_ids, attention_mask):
         outputs = self.mod(input_ids=input_ids, attention_mask=attention_mask)
-        return outputs.last_hidden_state[:, 0, :]
+        outputs = self.dense(outputs.last_hidden_state[:, 0, :])
+        return self.sigmoid(outputs) * 5
     
     def training_step(self, batch, batch_idx):
-        emb_sen1 = self(batch['input_ids'][0].squeeze(), batch['attention_mask'][0].squeeze())
-        emb_sen2 = self(batch['input_ids'][1].squeeze(), batch['attention_mask'][1].squeeze())
-        similarity = self.cosine_similarity(emb_sen1, emb_sen2)
-        similarity = 2.5*similarity + 2.5
-        loss = nn.MSELoss()(similarity, batch['labels'].squeeze())
+        outputs = self(batch['input_ids'].squeeze(), batch['attention_mask'].squeeze())
+        loss = nn.MSELoss()(outputs, batch['labels'])
         self.log('train_loss', loss, on_step=False, on_epoch=True)
         return loss
     
     def validation_step(self, batch, batch_idx):
-        emb_sen1 = self(batch['input_ids'][0].squeeze(), batch['attention_mask'][0].squeeze())
-        emb_sen2 = self(batch['input_ids'][1].squeeze(), batch['attention_mask'][1].squeeze())
-        similarity = self.cosine_similarity(emb_sen1, emb_sen2)
-        similarity = 2.5*similarity + 2.5
-        loss = nn.MSELoss()(similarity, batch['labels'].squeeze())
-        pearson_corr = pearson_corrcoef(similarity, batch['labels'].squeeze())
+        outputs = self(batch['input_ids'].squeeze(), batch['attention_mask'].squeeze())
+        loss = nn.MSELoss()(outputs, batch['labels'])
+        pearson_corr = pearson_corrcoef(outputs, batch['labels'])
         self.log('val_loss', loss, on_step=False, on_epoch=True)
         self.log('val_pearson_corr', pearson_corr, on_step=False, on_epoch=True)
-        return {'val_loss': loss, 'predictions': similarity, 'targets': batch['labels']}
+        return {'val_loss': loss, 'predictions': outputs, 'targets': batch['labels']}
     
     def test_step(self, batch, batch_idx):
         emb_sen1 = self(batch['input_ids'][0].squeeze(), batch['attention_mask'][0].squeeze())
