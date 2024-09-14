@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchmetrics.functional import pearson_corrcoef
 import pytorch_lightning as pl
 from transformers import AutoModel
 from scipy.stats import pearsonr
@@ -36,9 +37,9 @@ class STSModel(pl.LightningModule):
         similarity = self.cosine_similarity(emb_sen1, emb_sen2)
         similarity = 2.5*similarity + 2.5
         loss = nn.MSELoss()(similarity, batch['labels'].squeeze())
-        # pearson_corr, _ = pearsonr(batch['labels'].cpu(), similarity.cpu())
+        pearson_corr = pearson_corrcoef(similarity, batch['labels'].squeeze())
         self.log('val_loss', loss, on_step=False, on_epoch=True)
-        # self.log('val_pearson_corr', pearson_corr)
+        self.log('val_pearson_corr', pearson_corr, on_step=False, on_epoch=True)
         return {'val_loss': loss, 'predictions': similarity, 'targets': batch['labels']}
     
     def test_step(self, batch, batch_idx):
