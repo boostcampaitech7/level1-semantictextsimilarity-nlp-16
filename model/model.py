@@ -14,7 +14,6 @@ class STSModel(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters(config)
         self.mod = AutoModel.from_pretrained(config['MODEL_NAME'])
-        self.mod.train()
         self.dense = nn.Linear(384, 1)
         self.sigmoid = nn.Sigmoid()
         self.lr = config['LEARNING_RATE']
