@@ -19,17 +19,8 @@ class TextDataset(Dataset):
         if self.labels is not None:
             label = self.labels[idx]
 
-        encoding_1 = self.tokenizer(
+        encoding = self.tokenizer(
             sentence_1,
-            add_special_tokens=True,
-            max_length=self.max_len,
-            padding='max_length',
-            truncation=self.truncation,
-            return_attention_mask=True,
-            return_token_type_ids=True,
-            return_tensors='pt',
-        )
-        encoding_2 = self.tokenizer(
             sentence_2,
             add_special_tokens=True,
             max_length=self.max_len,
@@ -39,11 +30,10 @@ class TextDataset(Dataset):
             return_token_type_ids=True,
             return_tensors='pt',
         )
-
         return {
             'sentence_pair': [sentence_1, sentence_2],
-            'input_ids': [encoding_1['input_ids'], encoding_2['input_ids']],
-            'attention_mask': [encoding_1['attention_mask'], encoding_2['attention_mask']],
-            'token_type_ids': [encoding_1['token_type_ids'], encoding_2['token_type_ids']],
+            'input_ids': encoding['input_ids'],
+            'attention_mask': encoding['attention_mask'],
+            'token_type_ids': encoding['token_type_ids'],
             'labels': torch.tensor([label]) if self.labels is not None else None
         }
