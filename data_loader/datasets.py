@@ -11,7 +11,7 @@ class TextDataset(Dataset):
         self.truncation = truncation
 
     def __len__(self):
-        return len(self.labels)
+        return len(self.sentence_1)
 
     def __getitem__(self, idx):
         sentence_1 = self.sentence_1[idx]
