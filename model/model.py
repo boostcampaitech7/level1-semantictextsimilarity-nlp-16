@@ -38,10 +38,8 @@ class STSModel(pl.LightningModule):
         return {'val_loss': loss, 'predictions': outputs, 'targets': batch['labels']}
     
     def test_step(self, batch, batch_idx):
-        emb_sen1 = self(batch['input_ids'][0].squeeze(), batch['attention_mask'][0].squeeze())
-        emb_sen2 = self(batch['input_ids'][1].squeeze(), batch['attention_mask'][1].squeeze())
-        similarity = self.cosine_similarity(emb_sen1, emb_sen2)
-        return {'predictions' : similarity}
+        outputs = self(batch['input_ids'].squeeze(), batch['attention_mask'].squeeze())
+        return {'predictions' : outputs}
         
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
