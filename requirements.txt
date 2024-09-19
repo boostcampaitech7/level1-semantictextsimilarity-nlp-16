@@ -1,9 +1,9 @@
 numpy
 pandas
 wandb
-yaml
+PyYAML
 pytorch_lightning
-sckit-learn
+scikit-learn
 scipy
 transformers
 nltk
