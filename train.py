@@ -24,12 +24,16 @@ from data_loader.data_loaders import TextDataLoader
 from utils.util import set_seed
 from model.model import STSModel
 from utils.util import WandbCheckpointCallback
+from utils import preprocessing
 
 def main(config):
     
     ## data
     train = pd.read_csv('data/train.csv')
     dev = pd.read_csv('data/dev.csv')
+
+    train = preprocessing(train)
+    dev = preprocessing(dev)
 
     tokenizer = get_tokenizer(config['MODEL_NAME'])
     dataloader = TextDataLoader(
