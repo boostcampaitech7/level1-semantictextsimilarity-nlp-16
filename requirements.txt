@@ -7,3 +7,7 @@ scikit-learn
 scipy
 transformers
 nltk
+git+https://github.com/haven-jeon/PyKoSpacing.git
+git+https://github.com/ssut/py-hanspell.git
+matplotlib
+seaborn
