@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
-from .datasets import TextDataset
+from .datasets import TextDataset, TestDataset
 
 
 class TextDataLoader(pl.LightningDataModule):
@@ -40,7 +40,7 @@ class TextDataLoader(pl.LightningDataModule):
                 max_len=self.max_len
                 )
         else :
-            self.test_dataset=TextDataset(
+            self.test_dataset=TestDataset(
                 sentence_1=self.test_data['sentence_1'],
                 sentence_2=self.test_data['sentence_2'],
                 tokenizer=self.tokenizer,
@@ -53,5 +53,5 @@ class TextDataLoader(pl.LightningDataModule):
     def val_dataloader(self):
         return DataLoader(self.dev_dataset, batch_size=self.batch_size)
     
-    def test_dataloader(self):
+    def predict_dataloader(self):
         return DataLoader(self.test_dataset, batch_size=self.batch_size)
