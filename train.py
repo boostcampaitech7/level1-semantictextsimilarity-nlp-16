@@ -6,8 +6,8 @@ import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
-from parse_config import ConfigParser
-from trainer import Trainer
+# from parse_config import ConfigParser
+# from trainer import Trainer
 from utils import prepare_device
 
 
@@ -24,7 +24,7 @@ from data_loader.data_loaders import TextDataLoader
 from utils.util import set_seed
 from model.model import STSModel
 from utils.util import WandbCheckpointCallback
-from utils import preprocessing
+from utils.preprocessing import preprocessing
 
 def main(config):
     
