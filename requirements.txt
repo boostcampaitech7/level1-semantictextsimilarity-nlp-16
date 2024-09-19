@@ -1,9 +1,13 @@
 numpy
 pandas
 wandb
-yaml
+PyYAML
 pytorch_lightning
-sckit-learn
+scikit-learn
 scipy
 transformers
 nltk
+git+https://github.com/haven-jeon/PyKoSpacing.git
+git+https://github.com/ssut/py-hanspell.git
+matplotlib
+seaborn
