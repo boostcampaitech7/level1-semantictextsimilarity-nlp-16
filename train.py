@@ -1,31 +1,27 @@
 import argparse
 import collections
-import torch
-import numpy as np
-import data_loader.data_loaders as module_data
-import model.loss as module_loss
-import model.metric as module_metric
-import model.model as module_arch
-
-# from parse_config import ConfigParser
-# from trainer import Trainer
-from utils import prepare_device
-
-
 import datetime
 
 import numpy as np
 import pandas as pd
+import torch
 import wandb
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
-from utils.tokenizer import get_tokenizer
+
+import data_loader.data_loaders as module_data
+import model.loss as module_loss
+import model.metric as module_metric
+import model.model as module_arch
 from data_loader.data_loaders import TextDataLoader
-from utils.util import set_seed
 from model.model import STSModel
-from utils.util import WandbCheckpointCallback
+# from parse_config import ConfigParser
+# from trainer import Trainer
+from utils import prepare_device
 from utils.preprocessing import preprocessing
+from utils.tokenizer import get_tokenizer
+from utils.util import WandbCheckpointCallback, set_seed
 
 
 def main(config):

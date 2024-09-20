@@ -1,6 +1,7 @@
-from torch.utils.data import DataLoader
 import pytorch_lightning as pl
-from .datasets import TextDataset, TestDataset
+from torch.utils.data import DataLoader
+
+from .datasets import TestDataset, TextDataset
 
 
 class TextDataLoader(pl.LightningDataModule):
