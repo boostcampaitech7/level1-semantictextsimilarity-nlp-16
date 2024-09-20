@@ -1,14 +1,15 @@
 import argparse
+
+import pandas as pd
 import torch
+from parse_config import ConfigParser
+from pytorch_lightning import Trainer
 from tqdm import tqdm
+
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
-from parse_config import ConfigParser
-
-import pandas as pd
-from pytorch_lightning import Trainer
 from data_loader.data_loaders import TextDataLoader
 from utils.tokenzier import get_tokenizer
 from utils.util import model_load

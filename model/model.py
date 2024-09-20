@@ -1,12 +1,12 @@
 import numpy as np
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchmetrics.functional import pearson_corrcoef
-import pytorch_lightning as pl
-from transformers import AutoModel
-from scipy.stats import pearsonr
 import wandb
+from scipy.stats import pearsonr
+from torchmetrics.functional import pearson_corrcoef
+from transformers import AutoModel
 
 
 class STSModel(pl.LightningModule):
