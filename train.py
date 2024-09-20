@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import torch
 import wandb
+# from parse_config import ConfigParser
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
@@ -16,12 +17,13 @@ import model.metric as module_metric
 import model.model as module_arch
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
-# from parse_config import ConfigParser
-# from trainer import Trainer
 from utils import prepare_device
 from utils.preprocessing import preprocessing
 from utils.tokenizer import get_tokenizer
 from utils.util import WandbCheckpointCallback, set_seed
+
+# from trainer import Trainer
+
 
 
 def main(config):

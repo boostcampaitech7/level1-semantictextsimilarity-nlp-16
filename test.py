@@ -2,7 +2,7 @@ import argparse
 
 import pandas as pd
 import torch
-from parse_config import ConfigParser
+# from parse_config import ConfigParser
 from pytorch_lightning import Trainer
 from tqdm import tqdm
 
@@ -11,7 +11,7 @@ import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
 from data_loader.data_loaders import TextDataLoader
-from utils.tokenzier import get_tokenizer
+from utils.tokenizer import get_tokenizer
 from utils.util import model_load
 
 
