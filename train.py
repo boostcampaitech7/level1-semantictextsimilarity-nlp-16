@@ -62,7 +62,7 @@ def main(config):
 
     wandb_checkpoint_callback = WandbCheckpointCallback(top_k=3)
 
-    run_name = f'{config['MODEL_NAME']}-{datetime.datetime.now().strftime("%d%H%M")}'
+    run_name = f'{config["MODEL_NAME"]}-{datetime.datetime.now().strftime("%d%H%M")}'
     wandb_logger = WandbLogger(name = run_name, project="Level1-STS")
 
     trainer = Trainer(
