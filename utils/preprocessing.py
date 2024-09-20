@@ -7,29 +7,31 @@
 """
 
 from hanspell import spell_checker
+from pykospacing import Spacing
 from soynlp.normalizer import *
 
 
-def spacing(text):  # 미구현
-    return text
-
-
 def spell_check(text):  # py-hanspell 패키지 버그 존재, 다른 패키지 찾아보기
-    result = spell_checker.check(text)
+    result = spell_checker.check(text)  # https://cherie-ssom.tistory.com/2
     return result.checked
 
 
 def remove_repeat_text(text):
-    result = repeat_normalize(text)  # 네번 이상 반복되는 것만 2개로 줄여줌
+    result = repeat_normalize(
+        text, num_repeats=2
+    )  # 네번 이상 반복되는 것만 2개로 줄여줌
     return result
 
 
 def preprocessing(df):
-    # df['sentence_1'] = df['sentence_1'].apply(spacing)
-    # df['sentence_1'] = df['sentence_1'].apply(spell_check)
+    # spacing 안쓰는게 전처리가 더 잘됨
+    spacing = Spacing()
+
+    # df["sentence_1"] = df["sentence_1"].apply(spacing)
+    df["sentence_1"] = df["sentence_1"].apply(spell_check)
     df["sentence_1"] = df["sentence_1"].apply(remove_repeat_text)
 
-    # df['sentence_2'] = df['sentence_2'].apply(spacing)
-    # df['sentence_2'] = df['sentence_2'].apply(spell_check)
+    # df["sentence_2"] = df["sentence_2"].apply(spacing)
+    df["sentence_2"] = df["sentence_2"].apply(spell_check)
     df["sentence_2"] = df["sentence_2"].apply(remove_repeat_text)
     return df
