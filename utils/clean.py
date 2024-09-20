@@ -10,7 +10,7 @@ nltk.download("stopwords")
 
 
 def remove_punctuation_and_special_chars(text):
-    return re.sub(r"[^a-zA-Z0-9가-힣\s]", "", text)
+    return re.sub(r"[^a-z0-9가-힣\s]", "", text)
 
 
 def remove_stopwords(text, language="english"):
@@ -20,15 +20,14 @@ def remove_stopwords(text, language="english"):
     return " ".join(filtered_text)
 
 
-def clean_text(text, remove_stop=True, language="english"):
+def clean_text(text, remove_stop=False, language="english"):
     text = text.lower()
     text = remove_punctuation_and_special_chars(text)
 
     if remove_stop:
         text = remove_stopwords(text, language)
-
     return text
 
 
-def clean_texts(texts, remove_stop=True, language="english"):
+def clean_texts(texts, remove_stop=False, language="english"):
     return [clean_text(text, remove_stop, language) for text in texts]
