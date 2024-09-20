@@ -15,32 +15,44 @@ from utils.util import model_load
 
 
 def main(model, config):
-    test = pd.read_csv('data/test.csv')
-    tokenizer = get_tokenizer(config['MODEL_NAME'])
+    test = pd.read_csv("data/test.csv")
+    tokenizer = get_tokenizer(config["MODEL_NAME"])
     dataloader = TextDataLoader(
         tokenizer=tokenizer,
-        max_len=config['MAX_LEN'],
-        test_data = test,
+        max_len=config["MAX_LEN"],
+        test_data=test,
         truncation=True,
-        batch_size=config['BATCH_SIZE']
+        batch_size=config["BATCH_SIZE"],
     )
-    
-    trainer = Trainer(
-        accelerator="gpu",
-        devices=1
-    )
+
+    trainer = Trainer(accelerator="gpu", devices=1)
 
     trainer.test(model, dataloader)
 
 
-if __name__ == '__main__':
-    args = argparse.ArgumentParser(description='PyTorch Template')
-    args.add_argument('-c', '--config', default=None, type=str,
-                      help='config file path (default: None)')
-    args.add_argument('-r', '--resume', default=None, type=str,
-                      help='path to latest checkpoint (default: None)')
-    args.add_argument('-d', '--device', default=None, type=str,
-                      help='indices of GPUs to enable (default: all)')
+if __name__ == "__main__":
+    args = argparse.ArgumentParser(description="PyTorch Template")
+    args.add_argument(
+        "-c",
+        "--config",
+        default=None,
+        type=str,
+        help="config file path (default: None)",
+    )
+    args.add_argument(
+        "-r",
+        "--resume",
+        default=None,
+        type=str,
+        help="path to latest checkpoint (default: None)",
+    )
+    args.add_argument(
+        "-d",
+        "--device",
+        default=None,
+        type=str,
+        help="indices of GPUs to enable (default: all)",
+    )
 
-    model, config = model_load('run_name', 'model_path')
+    model, config = model_load("run_name", "model_path")
     main(model, config)

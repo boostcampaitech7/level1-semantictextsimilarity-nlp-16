@@ -16,20 +16,24 @@ def ensure_dir(dirname):
     if not dirname.is_dir():
         dirname.mkdir(parents=True, exist_ok=False)
 
+
 def read_json(fname):
     fname = Path(fname)
-    with fname.open('rt') as handle:
+    with fname.open("rt") as handle:
         return json.load(handle, object_hook=OrderedDict)
+
 
 def write_json(content, fname):
     fname = Path(fname)
-    with fname.open('wt') as handle:
+    with fname.open("wt") as handle:
         json.dump(content, handle, indent=4, sort_keys=False)
 
+
 def inf_loop(data_loader):
-    ''' wrapper function for endless data loader. '''
+    """wrapper function for endless data loader."""
     for loader in repeat(data_loader):
         yield from loader
+
 
 def prepare_device(n_gpu_use):
     """
@@ -37,21 +41,26 @@ def prepare_device(n_gpu_use):
     """
     n_gpu = torch.cuda.device_count()
     if n_gpu_use > 0 and n_gpu == 0:
-        print("Warning: There\'s no GPU available on this machine,"
-              "training will be performed on CPU.")
+        print(
+            "Warning: There's no GPU available on this machine,"
+            "training will be performed on CPU."
+        )
         n_gpu_use = 0
     if n_gpu_use > n_gpu:
-        print(f"Warning: The number of GPU\'s configured to use is {n_gpu_use}, but only {n_gpu} are "
-              "available on this machine.")
+        print(
+            f"Warning: The number of GPU's configured to use is {n_gpu_use}, but only {n_gpu} are "
+            "available on this machine."
+        )
         n_gpu_use = n_gpu
-    device = torch.device('cuda:0' if n_gpu_use > 0 else 'cpu')
+    device = torch.device("cuda:0" if n_gpu_use > 0 else "cpu")
     list_ids = list(range(n_gpu_use))
     return device, list_ids
+
 
 class MetricTracker:
     def __init__(self, *keys, writer=None):
         self.writer = writer
-        self._data = pd.DataFrame(index=keys, columns=['total', 'counts', 'average'])
+        self._data = pd.DataFrame(index=keys, columns=["total", "counts", "average"])
         self.reset()
 
     def reset(self):
@@ -70,7 +79,8 @@ class MetricTracker:
 
     def result(self):
         return dict(self._data.average)
-    
+
+
 class WandbCheckpointCallback(pl.Callback):
     def __init__(self, top_k=3):
         self.top_k = top_k
@@ -86,8 +96,8 @@ class WandbCheckpointCallback(pl.Callback):
     def on_save_checkpoint(self, trainer, pl_module, checkpoint):
         if self.metric_score is not None:
             # Wandb에 체크포인트 업로드
-            now = datetime.datetime.now().strftime('%d%H%M')
-            artifact = wandb.Artifact(f'best-model-{now}', type="model")
+            now = datetime.datetime.now().strftime("%d%H%M")
+            artifact = wandb.Artifact(f"best-model-{now}", type="model")
             artifact.add_file(trainer.checkpoint_callback.best_model_path)
             trainer.logger.experiment.log_artifact(artifact)
 
@@ -103,22 +113,19 @@ class WandbCheckpointCallback(pl.Callback):
                     # 새로운 모델 추가
                     self.best_k_models[self.metric_score] = artifact
 
-def model_load(
-        run_name,
-        model_path,
-        project_name='Level1-STS'
-        ):
+
+def model_load(run_name, model_path, project_name="Level1-STS"):
     run = wandb.init(project=project_name, name=run_name)
     config = run.config
 
     artifact = wandb.use_artifact(f"{project_name}/{model_path}:latest")
-    model_dir = artifact.download(root='./saved')
+    model_dir = artifact.download(root="./saved")
 
-    model = torch.load(f'{model_dir}/model.pth')
+    model = torch.load(f"{model_dir}/model.pth")
 
     return model, config
 
-    
+
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
@@ -126,5 +133,3 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-
-
