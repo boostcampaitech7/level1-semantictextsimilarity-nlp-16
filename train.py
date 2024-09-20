@@ -25,7 +25,6 @@ from utils.util import WandbCheckpointCallback, set_seed
 # from trainer import Trainer
 
 
-
 def main(config):
 
     ## data
@@ -34,6 +33,8 @@ def main(config):
 
     train = preprocessing(train)
     dev = preprocessing(dev)
+    # print(train)
+    # print(dev)
 
     tokenizer = get_tokenizer(config["MODEL_NAME"])
     dataloader = TextDataLoader(
