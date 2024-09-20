@@ -1,6 +1,3 @@
-from hanspell import spell_checker
-from soynlp.normalizer import *
-
 """
 띄어쓰기: https://github.com/haven-jeon/PyKoSpacing
 맞춤법 교정: https://github.com/ssut/py-hanspell
@@ -8,6 +5,9 @@ from soynlp.normalizer import *
 - ㅋㅋㅋ등 중복 문자 처리: https://github.com/lovit/soynlp
 - 줄임말, 신조어 체크: soynlp 사용하여 처리 고민
 """
+
+from hanspell import spell_checker
+from soynlp.normalizer import *
 
 
 def spacing(text):  # 미구현
