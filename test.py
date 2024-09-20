@@ -11,12 +11,17 @@ import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
 from data_loader.data_loaders import TextDataLoader
+from utils.preprocessing import preprocessing
 from utils.tokenizer import get_tokenizer
 from utils.util import model_load
 
 
 def main(model, config):
     test = pd.read_csv("data/test.csv")
+
+    test = preprocessing(test)
+    # print(test)
+
     tokenizer = get_tokenizer(config["MODEL_NAME"])
     dataloader = TextDataLoader(
         tokenizer=tokenizer,
