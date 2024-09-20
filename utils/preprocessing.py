@@ -9,6 +9,7 @@
 from hanspell import spell_checker
 from pykospacing import Spacing
 from soynlp.normalizer import *
+from utils.clean import clean_text
 
 
 def spell_check(text):  # py-hanspell 패키지 버그 존재, 다른 패키지 찾아보기
@@ -30,8 +31,10 @@ def preprocessing(df):
     # df["sentence_1"] = df["sentence_1"].apply(spacing)
     df["sentence_1"] = df["sentence_1"].apply(spell_check)
     df["sentence_1"] = df["sentence_1"].apply(remove_repeat_text)
+    df["sentence_1"] = df["sentence_1"].apply(clean_text)
 
     # df["sentence_2"] = df["sentence_2"].apply(spacing)
     df["sentence_2"] = df["sentence_2"].apply(spell_check)
     df["sentence_2"] = df["sentence_2"].apply(remove_repeat_text)
+    df["sentence_2"] = df["sentence_2"].apply(clean_text)
     return df
