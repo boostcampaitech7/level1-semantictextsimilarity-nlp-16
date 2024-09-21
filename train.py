@@ -31,10 +31,10 @@ def main(config):
     train = pd.read_csv("data/train.csv")
     dev = pd.read_csv("data/dev.csv")
 
-    # train = preprocessing(train)
+    train = preprocessing(train)
     dev = preprocessing(dev)
     # print(train)
-    print(dev)
+    # print(dev)
 
     tokenizer = get_tokenizer(config["MODEL_NAME"])
     dataloader = TextDataLoader(
