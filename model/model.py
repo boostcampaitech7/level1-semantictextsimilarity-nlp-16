@@ -7,16 +7,26 @@ import wandb
 from scipy.stats import pearsonr
 from torchmetrics.functional import pearson_corrcoef
 from transformers import AutoModel
+from peft import get_peft_model, LoraConfig, TaskType
 
 
 class STSModel(pl.LightningModule):
     def __init__(self, config):
         super().__init__()
         self.save_hyperparameters(config)
-        self.mod = AutoModel.from_pretrained(config["MODEL_NAME"])
-        self.dense = nn.Linear(384, 1)
+        self.dense = nn.Linear(model.config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
         self.lr = config["LEARNING_RATE"]
+        
+        model = AutoModel.from_pretrained(config["MODEL_NAME"])
+        peft_config = LoraConfig(
+            r=8, 
+            lora_alpha=32,
+            target_modules=['q_proj', 'k_proj', 'v_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj'],
+            lora_dropout=0.05,
+            bias="none"
+        )
+        self.mod = get_peft_model(model, peft_config)
 
     def forward(self, input_ids, attention_mask):
         outputs = self.mod(input_ids=input_ids, attention_mask=attention_mask)
@@ -37,9 +47,9 @@ class STSModel(pl.LightningModule):
         self.log("val_pearson_corr", pearson_corr, on_step=False, on_epoch=True)
         return {"val_loss": loss, "predictions": outputs, "targets": batch["labels"]}
 
-    def test_step(self, batch, batch_idx):
+    def predict_step(self, batch, batch_idx):
         outputs = self(batch["input_ids"].squeeze(), batch["attention_mask"].squeeze())
-        return {"predictions": outputs}
+        return outputs.squeeze().tolist()
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
