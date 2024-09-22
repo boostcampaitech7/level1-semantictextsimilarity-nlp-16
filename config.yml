@@ -13,3 +13,7 @@ parameters:
     max: 0.001
   EPOCHS:
     value: 20
+  MODEL_NAME:
+    value: 'FacebookAI/xlm-roberta-large'
+  SEED:
+    value: 12345

@@ -1,12 +1,9 @@
 import os
-import argparse
-import collections
 
 import numpy as np
 import pandas as pd
 import torch
 import wandb
-# from parse_config import ConfigParser
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
@@ -18,7 +15,7 @@ from utils.tokenizer import get_tokenizer
 from utils.util import WandbCheckpointCallback, set_seed
 
 
-def main(args):
+def main():
     ## initialize wandb
     run = wandb.init()
     ## call configuration from wandb
@@ -29,14 +26,14 @@ def main(args):
     BATCH_SIZE = config["BATCH_SIZE"]
     LEARNING_RATE = config["LEARNING_RATE"]
     MAX_LEN = config["MAX_LEN"]
-    MODEL_NAME = args.model_name
+    MODEL_NAME = config["MODEL_NAME"]
 
     ## seed setting
-    SEED = args.seed
+    SEED = config["SEED"]
     set_seed(SEED)
 
     ## data
-    data_dir = args.path
+    data_dir = config['DATA_DIR']
     train_dir = os.path.join(data_dir, 'train.csv')
     dev_dir = os.path.join(data_dir, 'dev.csv')
 
@@ -94,27 +91,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = argparse.ArgumentParser(description="PyTorch Template")
-    args.add_argument(
-        "-p",
-        "--path",
-        default="./data",
-        type=str,
-        help="config data path (default: ./data)",
-    )
-    args.add_argument(
-        "-m",
-        "--model_name",
-        default=None,
-        type=str,
-        help="what models to call (default: None)",
-    )
-    args.add_argument(
-        "-s",
-        "--seed",
-        default=12345,
-        type=int,
-        help="give seed number for experiment (default: 12345)"
-    )
-
-    main(args)
+    main()
