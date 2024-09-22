@@ -26,7 +26,9 @@ def main():
     BATCH_SIZE = config["BATCH_SIZE"]
     LEARNING_RATE = config["LEARNING_RATE"]
     MAX_LEN = config["MAX_LEN"]
+    LORA_RANK = config['LORA_RANK']
     MODEL_NAME = config["MODEL_NAME"]
+    MODULE_NAMES = config["MODULE_NAMES"]
 
     ## seed setting
     SEED = config["SEED"]
@@ -61,6 +63,8 @@ def main():
             'MODEL_NAME': MODEL_NAME,
             'LEARNING_RATE': LEARNING_RATE,
             'MAX_LEN': MAX_LEN,
+            'LORA_RANK': LORA_RANK,
+            'MODULE_NAMES': MODULE_NAMES,
             'SEED': SEED
         }
     )

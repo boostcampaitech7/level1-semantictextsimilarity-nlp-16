@@ -2,12 +2,9 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import wandb
-from scipy.stats import pearsonr
 from torchmetrics.functional import pearson_corrcoef
 from transformers import AutoModel
-from peft import get_peft_model, LoraConfig, TaskType
+from peft import get_peft_model, LoraConfig
 
 
 class STSModel(pl.LightningModule):
@@ -16,16 +13,10 @@ class STSModel(pl.LightningModule):
         self.save_hyperparameters(config)
         
         model = AutoModel.from_pretrained(config["MODEL_NAME"])
-        # for name, module in model.named_modules():
-        #     print(name)
         peft_config = LoraConfig(
-            r=8, 
-            lora_alpha=32,
-            target_modules=[
-                'query',
-                'key',
-                'value'
-            ],
+            r=config["LORA_RANK"], 
+            lora_alpha=(16**2)/config["LORA_RANK"],
+            target_modules=config["MODULE_NAMES"],
             lora_dropout=0.05,
             bias="none"
         )
