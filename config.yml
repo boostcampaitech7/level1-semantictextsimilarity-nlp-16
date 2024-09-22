@@ -10,6 +10,6 @@ parameters:
     values: [64, 128]
   LEARNING_RATE:
     min: 0.0001
-    max: 0.1
+    max: 0.001
   EPOCHS:
     value: 20
