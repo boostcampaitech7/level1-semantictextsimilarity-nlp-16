@@ -1,3 +1,4 @@
+project: LEVEL1_STS
 program: train.py
 method: bayes
 metric:
@@ -17,3 +18,5 @@ parameters:
     value: 'FacebookAI/xlm-roberta-large'
   SEED:
     value: 12345
+  DATA_DIR:
+    value: './data'
