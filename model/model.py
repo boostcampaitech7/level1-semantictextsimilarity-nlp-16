@@ -14,19 +14,26 @@ class STSModel(pl.LightningModule):
     def __init__(self, config):
         super().__init__()
         self.save_hyperparameters(config)
-        self.dense = nn.Linear(model.config.hidden_size, 1)
-        self.sigmoid = nn.Sigmoid()
-        self.lr = config["LEARNING_RATE"]
         
         model = AutoModel.from_pretrained(config["MODEL_NAME"])
+        # for name, module in model.named_modules():
+        #     print(name)
         peft_config = LoraConfig(
             r=8, 
             lora_alpha=32,
-            target_modules=['q_proj', 'k_proj', 'v_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj'],
+            target_modules=[
+                'query',
+                'key',
+                'value'
+            ],
             lora_dropout=0.05,
             bias="none"
         )
+
         self.mod = get_peft_model(model, peft_config)
+        self.dense = nn.Linear(model.config.hidden_size, 1)
+        self.sigmoid = nn.Sigmoid()
+        self.lr = config["LEARNING_RATE"]
 
     def forward(self, input_ids, attention_mask):
         outputs = self.mod(input_ids=input_ids, attention_mask=attention_mask)
