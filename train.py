@@ -10,14 +10,14 @@ from pytorch_lightning.loggers import WandbLogger
 
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
-from utils.preprocessing import preprocessing
+from utils.clean import clean_texts
 from utils.tokenizer import get_tokenizer
 from utils.util import WandbCheckpointCallback, set_seed
 
 
 def main():
     ## initialize wandb
-    run = wandb.init(project="Level1_STS")
+    run = wandb.init(project="Level1_STS", entity="kangjun205")
     ## call configuration from wandb
     config = wandb.config
 
@@ -56,7 +56,12 @@ def main():
         truncation=True,
         batch_size=BATCH_SIZE,
     )
-    model = STSModel(config)
+    model = STSModel(
+        {
+            'MODEL_NAME': MODEL_NAME,
+            'LEARNING_RATE': LEARNING_RATE
+        }
+    )
 
     early_stop_callback = EarlyStopping(
         monitor="val_loss",
@@ -66,7 +71,7 @@ def main():
 
     checkpoint_callback = ModelCheckpoint(
         dirpath="saved",
-        filename=f'{epoch:02d}-{int(val_pearson_corr*1000):04d}',
+        filename='{epoch:02d}-{val_pearson_corr:.3f}',
         save_top_k=3,
         monitor="val_pearson_corr",
         mode="min",
@@ -75,13 +80,13 @@ def main():
     wandb_checkpoint_callback = WandbCheckpointCallback(top_k=3)
 
     run_name = f'{MODEL_NAME}_{LEARNING_RATE}'
-    wandb_logger = WandbLogger(name=run_name, project="Level1-STS")
+    wandb_logger = WandbLogger(name=run_name, project="Level1_STS")
 
     trainer = Trainer(
         accelerator="gpu",
         devices=1,
         max_epochs=EPOCHS,
-        val_check_interval=1,
+        val_check_interval=1.0,
         callbacks=[
             early_stop_callback,
             checkpoint_callback,
