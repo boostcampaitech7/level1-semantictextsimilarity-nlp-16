@@ -1,3 +1,4 @@
+import os
 import argparse
 import collections
 
@@ -28,18 +29,21 @@ def main(args):
     BATCH_SIZE = config["BATCH_SIZE"]
     LEARNING_RATE = config["LEARNING_RATE"]
     MAX_LEN = config["MAX_LEN"]
-
-    PATH = args.path
     MODEL_NAME = args.model_name
-    SEED = args.seed
 
     ## seed setting
+    SEED = args.seed
     set_seed(SEED)
 
     ## data
-    train = pd.read_csv("data/train.csv", dtype={'label': np.float32})
-    dev = pd.read_csv("data/dev.csv", dtype={'label': np.float32})
+    data_dir = args.path
+    train_dir = os.path.join(data_dir, 'train.csv')
+    dev_dir = os.path.join(data_dir, 'dev.csv')
 
+    train = pd.read_csv(train_dir, dtype={'label': np.float32})
+    dev = pd.read_csv(dev_dir, dtype={'label': np.float32})
+
+    ## preprocessing
     train = preprocessing(train)
     dev = preprocessing(dev)
 
