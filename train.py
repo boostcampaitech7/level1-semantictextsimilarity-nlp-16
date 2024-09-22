@@ -28,8 +28,8 @@ from utils.util import WandbCheckpointCallback, set_seed
 def main(config):
 
     ## data
-    train = pd.read_csv("data/train.csv")
-    dev = pd.read_csv("data/dev.csv")
+    train = pd.read_csv("data/train.csv", dtype={'label': np.float32})
+    dev = pd.read_csv("data/dev.csv", dtype={'label': np.float32})
 
     train = preprocessing(train)
     dev = preprocessing(dev)
