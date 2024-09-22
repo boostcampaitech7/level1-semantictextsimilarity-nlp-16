@@ -26,6 +26,12 @@ from utils.util import WandbCheckpointCallback, set_seed
 
 
 def main(config):
+    ## parameters
+    MODEL_NAME = config["MODEL_NAME"]
+    EPOCHS = config["EPOCHS"]
+    BATCH_SIZE = config["BATCH_SIZE"]
+    LEARNING_RATE = config["LEARNING_RATE"]
+    MAX_LEN = config["MAX_LEN"]
 
     ## data
     train = pd.read_csv("data/train.csv", dtype={'label': np.float32})
@@ -33,17 +39,15 @@ def main(config):
 
     train = preprocessing(train)
     dev = preprocessing(dev)
-    # print(train)
-    # print(dev)
 
-    tokenizer = get_tokenizer(config["MODEL_NAME"])
+    tokenizer = get_tokenizer(MODEL_NAME)
     dataloader = TextDataLoader(
         tokenizer=tokenizer,
-        max_len=config["MAX_LEN"],
+        max_len=MAX_LEN,
         train_data=train,
         dev_data=dev,
         truncation=True,
-        batch_size=config["BATCH_SIZE"],
+        batch_size=BATCH_SIZE,
     )
     model = STSModel(config)
 
@@ -59,13 +63,13 @@ def main(config):
 
     wandb_checkpoint_callback = WandbCheckpointCallback(top_k=3)
 
-    run_name = f'{config["MODEL_NAME"]}-{datetime.datetime.now().strftime("%d%H%M")}'
+    run_name = f'{MODEL_NAME}-{datetime.datetime.now().strftime("%d%H%M")}'
     wandb_logger = WandbLogger(name=run_name, project="Level1-STS")
 
     trainer = Trainer(
         accelerator="gpu",
         devices=1,
-        max_epochs=config["EPOCH"],
+        max_epochs=EPOCHS,
         log_every_n_steps=1,
         callbacks=[early_stop_callback, checkpoint_callback, wandb_checkpoint_callback],
         logger=wandb_logger,
