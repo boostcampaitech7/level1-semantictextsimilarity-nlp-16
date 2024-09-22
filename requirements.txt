@@ -6,6 +6,7 @@ pytorch_lightning
 scikit-learn
 scipy
 transformers
+peft
 nltk
 git+https://github.com/haven-jeon/PyKoSpacing.git
 git+https://github.com/ssut/py-hanspell.git
