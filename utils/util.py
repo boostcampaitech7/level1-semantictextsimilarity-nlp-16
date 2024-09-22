@@ -82,39 +82,6 @@ class MetricTracker:
         return dict(self._data.average)
 
 
-class WandbCheckpointCallback(pl.Callback):
-    def __init__(self, top_k=3):
-        self.top_k = top_k
-        self.best_k_models = {}
-        self.metric_score = None
-
-    def on_validation_end(self, trainer, pl_module):
-        # 현재 체크포인트의 성능 점수 가져오기
-        metric_score = trainer.callback_metrics.get("val_loss")
-        if metric_score:
-            self.metric_score = metric_score.item()
-
-    def on_save_checkpoint(self, trainer, pl_module, checkpoint):
-        if self.metric_score is not None:
-            # Wandb에 체크포인트 업로드
-            now = datetime.datetime.now().strftime("%d%H%M")
-            artifact = wandb.Artifact(f"best-model-{now}", type="model")
-            artifact.add_file(trainer.checkpoint_callback.best_model_path)
-            trainer.logger.experiment.log_artifact(artifact)
-
-            # 최상위 k개 모델 관리
-            if len(self.best_k_models) < self.top_k:
-                self.best_k_models[self.metric_score] = artifact
-            else:
-                worst_score = max(self.best_k_models.keys())
-                if self.metric_score < worst_score:
-                    # 가장 성능이 낮은 모델 삭제
-                    artifact_to_delete = self.best_k_models.pop(worst_score)
-                    trainer.logger.experiment.delete_artifact(artifact_to_delete.name)
-                    # 새로운 모델 추가
-                    self.best_k_models[self.metric_score] = artifact
-
-
 def model_load(run_name, model_path, project_name="Level1-STS"):
     run = wandb.init(project=project_name, name=run_name)
     config = run.config
