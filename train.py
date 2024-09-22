@@ -75,7 +75,7 @@ def main(config):
         devices=1,
         max_epochs=EPOCHS,
         val_check_interval=1,
-        callbacks=[early_stop_callback, checkpoint_callback],
+        callbacks=[early_stop_callback, checkpoint_callback, wandb_checkpoint_callback],
         logger = wandb_logger
     )
 
