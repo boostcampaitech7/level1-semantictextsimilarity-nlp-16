@@ -24,6 +24,7 @@ class STSModel(pl.LightningModule):
         self.mod = get_peft_model(model, peft_config)
         self.dense = nn.Linear(model.config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
+        self.loss = nn.MSELoss()
         self.lr = config["LEARNING_RATE"]
 
     def forward(self, input_ids, attention_mask):
@@ -33,13 +34,13 @@ class STSModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         outputs = self(batch["input_ids"].squeeze(), batch["attention_mask"].squeeze())
-        loss = nn.MSELoss()(outputs, batch["labels"])
+        loss = self.loss(outputs, batch["labels"])
         self.log("train_loss", loss, on_step=False, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         outputs = self(batch["input_ids"].squeeze(), batch["attention_mask"].squeeze())
-        loss = nn.MSELoss()(outputs, batch["labels"])
+        loss = self.loss(outputs, batch["labels"])
         pearson_corr = pearson_corrcoef(outputs, batch["labels"])
         self.log("val_loss", loss, on_step=False, on_epoch=True)
         self.log("val_pearson_corr", pearson_corr, on_step=False, on_epoch=True)
