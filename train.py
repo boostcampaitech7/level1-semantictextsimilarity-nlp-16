@@ -59,7 +59,9 @@ def main():
     model = STSModel(
         {
             'MODEL_NAME': MODEL_NAME,
-            'LEARNING_RATE': LEARNING_RATE
+            'LEARNING_RATE': LEARNING_RATE,
+            'MAX_LEN': MAX_LEN,
+            'SEED': SEED
         }
     )
 
@@ -74,13 +76,15 @@ def main():
         filename='{epoch:02d}-{val_pearson_corr:.3f}',
         save_top_k=3,
         monitor="val_pearson_corr",
-        mode="min",
+        mode="max",
     )
 
-    wandb_checkpoint_callback = WandbCheckpointCallback(top_k=3)
-
     run_name = f'{MODEL_NAME}_{LEARNING_RATE}'
-    wandb_logger = WandbLogger(name=run_name, project="Level1_STS")
+    wandb_logger = WandbLogger(
+        name=run_name,
+        project="Level1_STS",
+        log_model='all'
+    )
 
     trainer = Trainer(
         accelerator="gpu",
@@ -89,8 +93,7 @@ def main():
         val_check_interval=1.0,
         callbacks=[
             early_stop_callback,
-            checkpoint_callback,
-            wandb_checkpoint_callback
+            checkpoint_callback
         ],
         logger = wandb_logger
     )
