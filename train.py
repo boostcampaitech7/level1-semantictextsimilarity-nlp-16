@@ -51,11 +51,15 @@ def main(config):
     )
     model = STSModel(config)
 
-    early_stop_callback = EarlyStopping(monitor="val_loss", patience=3, mode="min")
+    early_stop_callback = EarlyStopping(
+        monitor="val_loss",
+        patience=3,
+        mode="min"
+    )
 
     checkpoint_callback = ModelCheckpoint(
         dirpath="saved",
-        filename=f'best-model-{datetime.datetime.now().strftime("%d%H%M%S")}',
+        filename=f'{MODEL_NAME}',
         save_top_k=3,
         monitor="val_loss",
         mode="min",
@@ -63,20 +67,19 @@ def main(config):
 
     wandb_checkpoint_callback = WandbCheckpointCallback(top_k=3)
 
-    run_name = f'{MODEL_NAME}-{datetime.datetime.now().strftime("%d%H%M")}'
+    run_name = f'{MODEL_NAME}_'
     wandb_logger = WandbLogger(name=run_name, project="Level1-STS")
 
     trainer = Trainer(
         accelerator="gpu",
         devices=1,
         max_epochs=EPOCHS,
-        log_every_n_steps=1,
-        callbacks=[early_stop_callback, checkpoint_callback, wandb_checkpoint_callback],
-        logger=wandb_logger,
+        val_check_interval=1,
+        callbacks=[early_stop_callback, checkpoint_callback],
+        logger = wandb_logger
     )
 
-    trainer.fit(model, dataloader)
-    trainer.validate(model, dataloader)
+    trainer.fit(model, datamodule=dataloader)
 
 
 if __name__ == "__main__":
