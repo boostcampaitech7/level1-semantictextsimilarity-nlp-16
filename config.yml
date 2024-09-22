@@ -5,17 +5,21 @@ metric:
   name: validation_loss
   goal: minimize
 parameters:
+  EPOCHS:
+    value: 20
   BATCH_SIZE:
     value: 32
   MAX_LEN:
     values: [64, 128]
   LEARNING_RATE:
     min: 0.0001
-    max: 0.001
-  EPOCHS:
-    value: 20
+    max: 0.0005
+  LORA_RANK:
+    values: [8, 16]
   MODEL_NAME:
     value: 'FacebookAI/xlm-roberta-large'
+  MODULE_NAMES:
+    value: ['query', 'key', value]
   SEED:
     value: 12345
   DATA_DIR:
