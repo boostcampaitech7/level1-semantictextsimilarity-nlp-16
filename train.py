@@ -87,7 +87,7 @@ def main():
     wandb_logger = WandbLogger(
         name=run_name,
         project="Level1_STS",
-        log_model='all'
+        log_model='best'
     )
 
     trainer = Trainer(
