@@ -17,7 +17,7 @@ from utils.util import WandbCheckpointCallback, set_seed
 
 def main():
     ## initialize wandb
-    run = wandb.init()
+    run = wandb.init(project="Level1_STS")
     ## call configuration from wandb
     config = wandb.config
 
