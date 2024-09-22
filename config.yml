@@ -19,7 +19,7 @@ parameters:
   MODEL_NAME:
     value: 'FacebookAI/xlm-roberta-large'
   MODULE_NAMES:
-    value: ['query', 'key', value]
+    value: ['query', 'key', 'value']
   SEED:
     value: 12345
   DATA_DIR:
