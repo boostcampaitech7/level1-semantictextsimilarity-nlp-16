@@ -5,13 +5,11 @@ metric:
   goal: minimize
 parameters:
   BATCH_SIZE:
-    values: [32, 64, 128]
+    value: 32
   MAX_LEN:
-    value: 128
+    values: [64, 128]
   LEARNING_RATE:
     min: 0.0001
     max: 0.1
   EPOCHS:
-    values: [10, 15, 20]
-  MODEL_NAME:
-    value: 'intfloat/multilingual-e5-small'
+    value: 20
