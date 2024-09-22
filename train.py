@@ -41,8 +41,11 @@ def main():
     dev = pd.read_csv(dev_dir, dtype={'label': np.float32})
 
     ## preprocessing
-    train = preprocessing(train)
-    dev = preprocessing(dev)
+    # train['sentence_1'] = clean_texts(train['sentence_1'])
+    # train['sentence_2'] = clean_texts(train['sentence_2'])
+
+    # dev['sentence_1'] = clean_texts(dev['sentence_1'])
+    # dev['sentence_2'] = clean_texts(dev['sentence_2'])
 
     tokenizer = get_tokenizer(MODEL_NAME)
     dataloader = TextDataLoader(
