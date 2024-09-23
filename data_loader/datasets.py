@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-class TextDataset(Dataset):
+class TrainDataset(Dataset):
     def __init__(
         self, sentence_1, sentence_2, labels, tokenizer, max_len, truncation=True
     ):
