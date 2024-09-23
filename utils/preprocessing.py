@@ -7,15 +7,22 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from pykospacing import Spacing
 from soynlp.normalizer import *
+from tqdm import tqdm
 
 # nltk.download("punkt_tab")
 # nltk.download("punkt")
 nltk.download("stopwords")
 
 
-def remove_punctuation_and_special_chars(text):
+def clean_and_normalize_text(text):
+    # <PERSON> 토큰을 전처리 과정에서 보호
+    text = re.sub(r"<PERSON>", "PERSONTOKEN", text)
     text = text.lower()
-    return re.sub(r"[^a-z0-9가-힣\s]", "", text)
+    text = re.sub(r"[^a-zㄱ-ㅎ가-힣0-9\s.?!]", "", text)
+    # 보호했던 <PERSON> 토큰을 복원
+    text = re.sub(r"persontoken", "<PERSON>", text)
+    text = re.sub(r"[.!?]+", lambda m: m.group(0)[0], text)
+    return text
 
 
 # https://github.com/ssut/py-hanspell/issues/47#issue-2047956388
@@ -24,9 +31,8 @@ def spell_check(text):
     return result.checked
 
 
-# 네 번 이상 반복되는 것만 2개로 줄여줌
 def remove_repeat_text(text):
-    result = repeat_normalize(text, num_repeats=2)
+    result = repeat_normalize(text, num_repeats=3)
     return result
 
 
@@ -61,17 +67,21 @@ def remove_stopwords(text, remove_english_stop=False, remove_korean_stop=False):
     return text
 
 
+def preprocess_text(text):
+    text = clean_and_normalize_text(text)
+    # text = Spacing()(text)  # Uncomment if needed
+    text = spell_check(text)
+    text = remove_repeat_text(text)
+    # text = remove_stopwords(text, remove_english_stop=False, remove_korean_stop=False)
+    return text
+
+
 def preprocessing(df):
+    tqdm.pandas()
     columns_to_preprocess = ["sentence_1", "sentence_2"]
-    df[columns_to_preprocess] = df[columns_to_preprocess].map(
-        remove_punctuation_and_special_chars
-    )
-    # df[columns_to_preprocess] = df[columns_to_preprocess].map(Spacing())
-    df[columns_to_preprocess] = df[columns_to_preprocess].map(spell_check)
-    df[columns_to_preprocess] = df[columns_to_preprocess].map(remove_repeat_text)
-    df[columns_to_preprocess] = df[columns_to_preprocess].map(
-        lambda x: remove_stopwords(
-            x, remove_english_stop=False, remove_korean_stop=True
-        )
-    )
+
+    for column in columns_to_preprocess:
+        tqdm.write(f"Processing column: {column}")
+        df[column] = df[column].progress_apply(preprocess_text)
+
     return df

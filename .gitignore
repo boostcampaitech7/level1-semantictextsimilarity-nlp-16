@@ -104,6 +104,7 @@ ENV/
 data/
 input/
 saved/
+checkpoints/
 datasets/
 wandb/
 

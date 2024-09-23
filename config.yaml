@@ -8,19 +8,19 @@ parameters:
   EPOCHS:
     value: 20
   BATCH_SIZE:
-    value: 32
+    values: [16, 32, 64]
   MAX_LEN:
     values: [64, 128]
   LEARNING_RATE:
     min: 0.0001
-    max: 0.0005
+    max: 0.01
   LORA_RANK:
-    values: [8, 16, 32]
+    values: [1, 2, 4, 8, 16, 32, 64]
   MODEL_NAME:
-    value: 'FacebookAI/xlm-roberta-large'
+    value: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
   MODULE_NAMES:
     value: ['query', 'key', 'value']
   SEED:
-    value: 12345
+    value: 42
   DATA_DIR:
     value: './data'
