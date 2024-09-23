@@ -1,39 +1,61 @@
+import os
 import argparse
 
 import pandas as pd
 import torch
-# from parse_config import ConfigParser
+import wandb
 from pytorch_lightning import Trainer
-from tqdm import tqdm
 
-import data_loader.data_loaders as module_data
-import model.loss as module_loss
-import model.metric as module_metric
-import model.model as module_arch
 from data_loader.data_loaders import TextDataLoader
+from model.model import STSModel
 from utils.preprocessing import preprocessing
 from utils.tokenizer import get_tokenizer
 from utils.util import model_load
+from utils.clean import clean_texts
 
 
 def main(model, config):
-    test = pd.read_csv("data/test.csv")
 
-    test = preprocessing(test)
-    # print(test)
+    ## data reading
+    test = pd.read_csv("data/test.csv") ## data_dir arg 설정
+    submission = pd.read_csv('data/sample_submission.csv') ## data_dir
 
-    tokenizer = get_tokenizer(config["MODEL_NAME"])
+    ## model/config loading
+    wandb.login()
+
+    api = wandb.Api()
+    run = api.run("kangjun205/Level1_STS/dlyeghmc") ## run path argument로 설정
+
+    artifact = api.artifact('kangjun205/Level1_STS/model-q4x8581k:v14')
+    model_dir = artifact.download()
+    config = run.config
+
+    model = STSModel.load_from_checkpoint(f'{model_dir}/model.ckpt')
+
+    ## processing
+    test['sentence_1'] = clean_texts(test['sentence_1'])
+    test['sentence_2'] = clean_texts(test['sentence_2'])
+
+    tokenizer = get_tokenizer(config['MODEL_NAME'])
     dataloader = TextDataLoader(
         tokenizer=tokenizer,
-        max_len=config["MAX_LEN"],
+        max_len=config['MAX_LEN'],
         test_data=test,
-        truncation=True,
-        batch_size=config["BATCH_SIZE"],
+        truncation=True
+    )
+        
+    trainer = Trainer(
+        accelerator="gpu",
+        devices=1
     )
 
-    trainer = Trainer(accelerator="gpu", devices=1)
+    preds = trainer.predict(model, dataloader)
+    all_pred = [val for pred in preds for val in pred]
 
-    trainer.test(model, dataloader)
+    submission['target'] = all_pred
+    print(submission.head())
+
+    submission.to_csv('data/submission.csv', index=False)
 
 
 if __name__ == "__main__":
