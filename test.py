@@ -2,7 +2,6 @@ import os
 import argparse
 
 import pandas as pd
-import torch
 import wandb
 from pytorch_lightning import Trainer
 
@@ -10,7 +9,6 @@ from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
 from utils.preprocessing import preprocessing
 from utils.tokenizer import get_tokenizer
-from utils.util import model_load
 from utils.clean import clean_texts
 
 
