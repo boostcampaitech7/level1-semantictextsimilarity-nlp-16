@@ -14,19 +14,21 @@ from utils.util import model_load
 from utils.clean import clean_texts
 
 
-def main(model, config):
-
+def main(arg):
     ## data reading
-    test = pd.read_csv("data/test.csv") ## data_dir arg 설정
-    submission = pd.read_csv('data/sample_submission.csv') ## data_dir
+    test_dir = os.path.join(arg.data_dir, 'test.csv')
+    submission_dir = os.path.join(arg.data_dir, 'sample_submission.csv')
+
+    test = pd.read_csv(test_dir)
+    submission = pd.read_csv(submission_dir)
 
     ## model/config loading
     wandb.login()
 
     api = wandb.Api()
-    run = api.run("kangjun205/Level1_STS/dlyeghmc") ## run path argument로 설정
+    run = api.run(arg.run_path)
 
-    artifact = api.artifact('kangjun205/Level1_STS/model-q4x8581k:v14')
+    artifact = api.artifact(arg.model_path)
     model_dir = artifact.download()
     config = run.config
 
@@ -35,6 +37,9 @@ def main(model, config):
     ## processing
     test['sentence_1'] = clean_texts(test['sentence_1'])
     test['sentence_2'] = clean_texts(test['sentence_2'])
+
+    test = test.dropna(subset=['sentence_1', 'sentence_2'])
+    test = test.reset_index(drop=True)
 
     tokenizer = get_tokenizer(config['MODEL_NAME'])
     dataloader = TextDataLoader(
@@ -51,36 +56,35 @@ def main(model, config):
 
     preds = trainer.predict(model, dataloader)
     all_pred = [val for pred in preds for val in pred]
-
     submission['target'] = all_pred
-    print(submission.head())
 
+    print(submission.head())
     submission.to_csv('data/submission.csv', index=False)
 
 
 if __name__ == "__main__":
-    args = argparse.ArgumentParser(description="PyTorch Template")
+    args = argparse.ArgumentParser()
     args.add_argument(
-        "-c",
-        "--config",
+        "-d",
+        "--data_dir",
         default=None,
         type=str,
-        help="config file path (default: None)",
+        help="directory path for data (default: None)",
     )
     args.add_argument(
         "-r",
-        "--resume",
+        "--run_path",
         default=None,
         type=str,
-        help="path to latest checkpoint (default: None)",
+        help="wandb run path for an experiment (default: None)",
     )
     args.add_argument(
-        "-d",
-        "--device",
+        "-m",
+        "--model_path",
         default=None,
         type=str,
-        help="indices of GPUs to enable (default: all)",
+        help="artifact path for a model (default: all)",
     )
 
-    model, config = model_load("run_name", "model_path")
-    main(model, config)
+    arg = args.parse_args()
+    main(arg)
