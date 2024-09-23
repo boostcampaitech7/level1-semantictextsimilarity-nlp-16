@@ -12,7 +12,7 @@ from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
 from utils.clean import clean_texts
 from utils.tokenizer import get_tokenizer
-from utils.util import WandbCheckpointCallback, set_seed
+from utils.util import set_seed
 
 
 def main():
@@ -36,18 +36,18 @@ def main():
 
     ## data
     data_dir = config['DATA_DIR']
-    train_dir = os.path.join(data_dir, 'train.csv')
+    train_dir = os.path.join(data_dir, 'train_augmented.csv')
     dev_dir = os.path.join(data_dir, 'dev.csv')
 
     train = pd.read_csv(train_dir, dtype={'label': np.float32})
     dev = pd.read_csv(dev_dir, dtype={'label': np.float32})
 
     ## preprocessing
-    # train['sentence_1'] = clean_texts(train['sentence_1'])
-    # train['sentence_2'] = clean_texts(train['sentence_2'])
+    train['sentence_1'] = clean_texts(train['sentence_1'])
+    train['sentence_2'] = clean_texts(train['sentence_2'])
 
-    # dev['sentence_1'] = clean_texts(dev['sentence_1'])
-    # dev['sentence_2'] = clean_texts(dev['sentence_2'])
+    dev['sentence_1'] = clean_texts(dev['sentence_1'])
+    dev['sentence_2'] = clean_texts(dev['sentence_2'])
 
     tokenizer = get_tokenizer(MODEL_NAME)
     dataloader = TextDataLoader(
