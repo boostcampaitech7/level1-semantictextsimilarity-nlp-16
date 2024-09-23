@@ -1,10 +1,10 @@
-import pytorch_lightning as pl
+import pytorch_lightning as L
 from torch.utils.data import DataLoader
 
-from .datasets import TestDataset, TextDataset
+from .datasets import TestDataset, TrainDataset
 
 
-class TextDataLoader(pl.LightningDataModule):
+class TextDataLoader(L.LightningDataModule):
     def __init__(
         self,
         tokenizer,
@@ -16,31 +16,31 @@ class TextDataLoader(pl.LightningDataModule):
         batch_size=32,
     ):
         super().__init__()
+        self.tokenizer = tokenizer
+        self.max_len = max_len
         self.train_data = train_data
         self.dev_data = dev_data
         self.test_data = test_data
-        self.tokenizer = tokenizer
-        self.max_len = max_len
         self.truncation = truncation
         self.batch_size = batch_size
 
     def setup(self, stage=None):
         if stage == "fit":
-            self.train_dataset = TextDataset(
+            self.train_dataset = TrainDataset(
                 sentence_1=self.train_data["sentence_1"],
                 sentence_2=self.train_data["sentence_2"],
                 labels=self.train_data["label"],
                 tokenizer=self.tokenizer,
                 max_len=self.max_len,
             )
-            self.dev_dataset = TextDataset(
+            self.dev_dataset = TrainDataset(
                 sentence_1=self.dev_data["sentence_1"],
                 sentence_2=self.dev_data["sentence_2"],
                 labels=self.dev_data["label"],
                 tokenizer=self.tokenizer,
                 max_len=self.max_len,
             )
-        else:
+        if stage == "test":
             self.test_dataset = TestDataset(
                 sentence_1=self.test_data["sentence_1"],
                 sentence_2=self.test_data["sentence_2"],

@@ -1,23 +1,26 @@
 import os
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
+import pytorch_lightning as L
 import torch
-import wandb
-from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
+# from utils.util import WandbCheckpointCallback, set_seed
+from transformers import AutoTokenizer
 
+import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
-from utils.clean import clean_texts
-from utils.tokenizer import get_tokenizer
-from utils.util import WandbCheckpointCallback, set_seed
+# from utils.clean import clean_texts
+from utils.preprocessing import preprocessing
+from utils.util import set_seed
 
 
 def main():
     ## initialize wandb
-    run = wandb.init(project="Level1_STS", entity="kangjun205")
+    wandb.init()
     ## call configuration from wandb
     config = wandb.config
 
@@ -26,7 +29,7 @@ def main():
     BATCH_SIZE = config["BATCH_SIZE"]
     LEARNING_RATE = config["LEARNING_RATE"]
     MAX_LEN = config["MAX_LEN"]
-    LORA_RANK = config['LORA_RANK']
+    LORA_RANK = config["LORA_RANK"]
     MODEL_NAME = config["MODEL_NAME"]
     MODULE_NAMES = config["MODULE_NAMES"]
 
@@ -34,22 +37,32 @@ def main():
     SEED = config["SEED"]
     set_seed(SEED)
 
-    ## data
-    data_dir = config['DATA_DIR']
-    train_dir = os.path.join(data_dir, 'train.csv')
-    dev_dir = os.path.join(data_dir, 'dev.csv')
+    ## load, preprocess data
+    data_dir = config["DATA_DIR"]
+    train_dir = os.path.join(data_dir, "train.csv")
+    dev_dir = os.path.join(data_dir, "dev.csv")
+    preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
+    preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
 
-    train = pd.read_csv(train_dir, dtype={'label': np.float32})
-    dev = pd.read_csv(dev_dir, dtype={'label': np.float32})
+    if os.path.exists(preprocessed_train_dir) and os.path.exists(preprocessed_dev_dir):
+        print("Loading preprocessed files...")
+        train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
+        dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
+    else:
+        train = pd.read_csv(train_dir, dtype={"label": np.float32})
+        dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
 
-    ## preprocessing
-    # train['sentence_1'] = clean_texts(train['sentence_1'])
-    # train['sentence_2'] = clean_texts(train['sentence_2'])
+        print("Preprocessing train data...")
+        train = preprocessing(train)
+        print(f"Saving preprocessed train data to {preprocessed_train_dir}")
+        train.to_csv(preprocessed_train_dir, index=False)
+        print("Preprocessing dev data...")
+        dev = preprocessing(dev)
+        print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
+        dev.to_csv(preprocessed_dev_dir, index=False)
 
-    # dev['sentence_1'] = clean_texts(dev['sentence_1'])
-    # dev['sentence_2'] = clean_texts(dev['sentence_2'])
-
-    tokenizer = get_tokenizer(MODEL_NAME)
+    ## 학습 세팅
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     dataloader = TextDataLoader(
         tokenizer=tokenizer,
         max_len=MAX_LEN,
@@ -60,46 +73,37 @@ def main():
     )
     model = STSModel(
         {
-            'MODEL_NAME': MODEL_NAME,
-            'LEARNING_RATE': LEARNING_RATE,
-            'MAX_LEN': MAX_LEN,
-            'LORA_RANK': LORA_RANK,
-            'MODULE_NAMES': MODULE_NAMES,
-            'SEED': SEED
+            "MODEL_NAME": MODEL_NAME,
+            "LEARNING_RATE": LEARNING_RATE,
+            "MAX_LEN": MAX_LEN,
+            "LORA_RANK": LORA_RANK,
+            "MODULE_NAMES": MODULE_NAMES,
+            "SEED": SEED,
         }
     )
 
-    early_stop_callback = EarlyStopping(
-        monitor="val_loss",
-        patience=3,
-        mode="min"
-    )
+    wandb_logger = WandbLogger(name=f"{MODEL_NAME}_{LEARNING_RATE}", log_model="best")
 
+    ## 매 에포크마다 모델 체크포인트를 로컬에 저장
+    current_datetime = datetime.now().strftime("%y%m%d_%H%M%S")
     checkpoint_callback = ModelCheckpoint(
-        dirpath="saved",
-        filename='{epoch:02d}-{val_pearson_corr:.3f}',
+        dirpath=f"checkpoints/{MODEL_NAME}/{current_datetime}-{wandb.run.id}",
+        filename="{epoch}-{val_pearson_corr:.3f}-{val_loss:.3f}",
+        # save_last=True,
         save_top_k=3,
         monitor="val_pearson_corr",
         mode="max",
     )
 
-    run_name = f'{MODEL_NAME}_{LEARNING_RATE}'
-    wandb_logger = WandbLogger(
-        name=run_name,
-        project="Level1_STS",
-        log_model='best'
-    )
+    ## 얼리스탑 설정
+    early_stop_callback = EarlyStopping(monitor="val_loss", patience=5, mode="min")
 
-    trainer = Trainer(
+    trainer = L.Trainer(
         accelerator="gpu",
-        devices=1,
         max_epochs=EPOCHS,
-        val_check_interval=1.0,
-        callbacks=[
-            early_stop_callback,
-            checkpoint_callback
-        ],
-        logger = wandb_logger
+        logger=wandb_logger,
+        callbacks=[checkpoint_callback, early_stop_callback],
+        # val_check_interval=1.0,
     )
 
     trainer.fit(model, datamodule=dataloader)
