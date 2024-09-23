@@ -6,7 +6,7 @@ nltk.download('punkt_tab')
 nltk.download('punkt')
 nltk.download('stopwords')
 def remove_punctuation_and_special_chars(text):
-    return re.sub(r'[^a-zA-Z0-9\s]', '', text)
+    return re.sub(r'[^a-zA-Z0-9가-힣\s\.\!?]', '', text)
 def remove_stopwords(text, language='english'):
     stop_words = set(stopwords.words(language))
     word_tokens = word_tokenize(text)
