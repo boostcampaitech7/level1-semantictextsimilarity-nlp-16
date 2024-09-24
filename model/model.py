@@ -8,11 +8,10 @@ from transformers import AutoModel
 
 
 class STSModel(L.LightningModule):
-    def __init__(self, config):
+    def __init__(self, config, model):
         super().__init__()
         self.save_hyperparameters(config)
 
-        model = AutoModel.from_pretrained(config["MODEL_NAME"])
         peft_config = LoraConfig(
             r=config["LORA_RANK"],
             lora_alpha=(16**2) / config["LORA_RANK"],
