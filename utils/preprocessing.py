@@ -18,10 +18,10 @@ def clean_and_normalize_text(text):
     # <PERSON> 토큰을 전처리 과정에서 보호
     text = re.sub(r"<PERSON>", "PERSONTOKEN", text)
     text = text.lower()
-    text = re.sub(r"[^a-zㄱ-ㅎ가-힣0-9\s.?!]", "", text)
+    text = re.sub(r"[^a-zㄱ-ㅎ가-힣0-9\s?!;]", "", text)
     # 보호했던 <PERSON> 토큰을 복원
     text = re.sub(r"persontoken", "<PERSON>", text)
-    text = re.sub(r"[.!?]+", lambda m: m.group(0)[0], text)
+    text = re.sub(r"[!?;]+", lambda m: m.group(0)[0], text)
     return text
 
 

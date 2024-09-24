@@ -5,7 +5,6 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytorch_lightning as L
-import torch
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from transformers import AutoModel, AutoTokenizer
@@ -44,33 +43,30 @@ def main():
     train_dir = os.path.join(data_dir, "train.csv")
     dev_dir = os.path.join(data_dir, "dev.csv")
 
-    train = pd.read_csv(train_dir, dtype={"label": np.float32})
-    dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
-
-    # preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
-    # preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
-    # if preprocess == True:
-    #     if os.path.exists(preprocessed_train_dir) and os.path.exists(
-    #         preprocessed_dev_dir
-    #     ):
-    #         print("Loading preprocessed data...")
-    #         train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
-    #         dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
-    #     else:
-    #         train = pd.read_csv(train_dir, dtype={"label": np.float32})
-    #         dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
-    #         print("Preprocessing train data...")
-    #         train = preprocessing(train)
-    #         print(f"Saving preprocessed train data to {train_dir}")
-    #         train.to_csv(preprocessed_train_dir, index=False)
-    #         print("Preprocessing dev data...")
-    #         dev = preprocessing(dev)
-    #         print(f"Saving preprocessed dev data to {dev_dir}")
-    #         dev.to_csv(preprocessed_dev_dir, index=False)
-    # else:
-    #     print("Loading data...")
-    #     train = pd.read_csv(train_dir, dtype={"label": np.float32})
-    #     dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
+    preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
+    preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
+    if preprocess == True:
+        if os.path.exists(preprocessed_train_dir) and os.path.exists(
+            preprocessed_dev_dir
+        ):
+            print("Loading preprocessed data...")
+            train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
+            dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
+        else:
+            train = pd.read_csv(train_dir, dtype={"label": np.float32})
+            dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
+            print("Preprocessing train data...")
+            train = preprocessing(train)
+            print(f"Saving preprocessed train data to {train_dir}")
+            train.to_csv(preprocessed_train_dir, index=False)
+            print("Preprocessing dev data...")
+            dev = preprocessing(dev)
+            print(f"Saving preprocessed dev data to {dev_dir}")
+            dev.to_csv(preprocessed_dev_dir, index=False)
+    else:
+        print("Loading data...")
+        train = pd.read_csv(train_dir, dtype={"label": np.float32})
+        dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
 
     ## 학습 세팅
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -101,11 +97,11 @@ def main():
     )
 
     ## 매 에포크마다 모델 체크포인트를 로컬에 저장
-    current_datetime = datetime.now().strftime("%y%m%d_%H%M%S")
+    current_time = datetime.now().strftime("%y%m%d_%H%M%S")
     checkpoint_callback = ModelCheckpoint(
-        dirpath="saved",
-        filename="{epoch:02d}-{val_pearson_corr:.3f}",
-        save_top_k=1,
+        dirpath=f"checkpoints/{MODEL_NAME}/{current_time}_{wandb.run.id}",
+        filename="{epoch:02d}-{val_pearson_corr:.4f}",
+        save_top_k=3,
         monitor="val_pearson_corr",
         mode="max",
     )
@@ -121,6 +117,7 @@ def main():
         val_check_interval=1.0,
     )
 
+    # 학습
     trainer.fit(model, datamodule=dataloader)
 
     with open("config.json", "w") as f:
@@ -130,6 +127,7 @@ def main():
     artifact.add_file(checkpoint_callback.best_model_path)
     artifact.add_file("config.json")
     wandb.log_artifact(artifact)
+
 
 if __name__ == "__main__":
     main()
