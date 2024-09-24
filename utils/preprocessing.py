@@ -76,7 +76,7 @@ def preprocess_text(text):
     return text
 
 
-def preprocessing(df):
+def preprocess_data(df):
     tqdm.pandas()
     columns_to_preprocess = ["sentence_1", "sentence_2"]
 

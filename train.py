@@ -1,5 +1,5 @@
-import os
 import json
+import os
 from datetime import datetime
 
 import numpy as np
@@ -12,15 +12,14 @@ from transformers import AutoModel, AutoTokenizer
 import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
-from utils.preprocessing import preprocessing
+from utils.augmentation import augment_data
+from utils.preprocessing import preprocess_data
 from utils.util import set_seed
 
 
 def main():
     ## initialize wandb
-    wandb_logger = WandbLogger(
-        reinit=True
-    )
+    wandb_logger = WandbLogger(reinit=True)
     ## call configuration from wandb
     config = wandb_logger.experiment.config
 
@@ -56,17 +55,36 @@ def main():
             train = pd.read_csv(train_dir, dtype={"label": np.float32})
             dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
             print("Preprocessing train data...")
-            train = preprocessing(train)
-            print(f"Saving preprocessed train data to {train_dir}")
+            train = preprocess_data(train)
+            print(f"Saving preprocessed train data to {preprocessed_train_dir}")
             train.to_csv(preprocessed_train_dir, index=False)
             print("Preprocessing dev data...")
-            dev = preprocessing(dev)
-            print(f"Saving preprocessed dev data to {dev_dir}")
+            dev = preprocess_data(dev)
+            print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
             dev.to_csv(preprocessed_dev_dir, index=False)
     else:
-        print("Loading data...")
+        print("Loading raw data...")
         train = pd.read_csv(train_dir, dtype={"label": np.float32})
         dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
+
+    ## 데이터 증강, 전처리와 동시 적용하려면 증강만 된 데이터를 지우고 전처리를 True로 설정 후 적용
+    augment = False  # 증강 적용시 True로 설정
+    augmented_train_dir = os.path.join(data_dir, "augmented_train.csv")
+    augmented_dev_dir = os.path.join(data_dir, "augmented_dev.csv")
+    if augment:
+        if os.path.exists(augmented_train_dir) and os.path.exists(augmented_dev_dir):
+            print("Loading augmented data...")
+            train = pd.read_csv(augmented_train_dir, dtype={"label": np.float32})
+            dev = pd.read_csv(augmented_dev_dir, dtype={"label": np.float32})
+        else:
+            print("Augmenting train data...")
+            train = augment_data(train)
+            print(f"Saving augmented train data to {augmented_train_dir}")
+            train.to_csv(augmented_train_dir, index=False)
+            print("Augmenting dev data...")
+            dev = augment_data(dev)
+            print(f"Saving augmented dev data to {augmented_dev_dir}")
+            dev.to_csv(augmented_dev_dir, index=False)
 
     ## 학습 세팅
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
