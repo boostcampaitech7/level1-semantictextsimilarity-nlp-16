@@ -12,7 +12,7 @@ from transformers import AutoTokenizer, AutoModel
 import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
-# from utils.preprocessing import preprocessing
+from utils.preprocessing import preprocessing
 from utils.util import set_seed
 
 
