@@ -112,3 +112,7 @@ wandb/
 .vscode/
 .idea/
 __MACOSX/
+
+# custom
+artifacts/
+test.ipynb
