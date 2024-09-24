@@ -38,28 +38,30 @@ def main():
     set_seed(SEED)
 
     ## load, preprocess data
+    preprocess = False # 전처리 데이터 적용시 True로 변경
     data_dir = config["DATA_DIR"]
-    train_dir = os.path.join(data_dir, "train.csv")
-    dev_dir = os.path.join(data_dir, "dev.csv")
-    preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
-    preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
-
-    if os.path.exists(preprocessed_train_dir) and os.path.exists(preprocessed_dev_dir):
-        print("Loading preprocessed files...")
-        train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
-        dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
+    if preprocess == True:
+        train_dir = os.path.join(data_dir, "preprocessed_train.csv")
+        dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
+        if os.path.exists(train_dir) and os.path.exists(dev_dir):
+            print("Loading preprocessed files...")
+            train = pd.read_csv(train_dir, dtype={"label": np.float32})
+            dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
+        else:
+            print("Preprocessing train data...")
+            train = preprocessing(train)
+            print(f"Saving preprocessed train data to {train_dir}")
+            train.to_csv(train_dir, index=False)
+            print("Preprocessing dev data...")
+            dev = preprocessing(dev)
+            print(f"Saving preprocessed dev data to {dev_dir}")
+            dev.to_csv(dev_dir, index=False)
     else:
+        train_dir = os.path.join(data_dir, "train.csv")
+        dev_dir = os.path.join(data_dir, "dev.csv")
         train = pd.read_csv(train_dir, dtype={"label": np.float32})
         dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
-
-        print("Preprocessing train data...")
-        train = preprocessing(train)
-        print(f"Saving preprocessed train data to {preprocessed_train_dir}")
-        train.to_csv(preprocessed_train_dir, index=False)
-        print("Preprocessing dev data...")
-        dev = preprocessing(dev)
-        print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
-        dev.to_csv(preprocessed_dev_dir, index=False)
+    
 
     ## 학습 세팅
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
