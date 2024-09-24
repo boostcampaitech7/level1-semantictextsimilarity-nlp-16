@@ -1,9 +1,12 @@
 import os
+import json
 import argparse
 
 import pandas as pd
+import torch
 import wandb
 from pytorch_lightning import Trainer
+from transformers import AutoModel, AutoTokenizer
 
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
@@ -22,14 +25,22 @@ def main(arg):
     ## model/config loading
     wandb.login()
 
-    api = wandb.Api()
-    run = api.run(arg.run_path)
-
-    artifact = api.artifact(arg.model_path)
+    run = wandb.init()
+    artifact = run.use_artifact(arg.model_path)
     model_dir = artifact.download()
-    config = run.config
+    
+    with open('config.json', 'r') as f:
+        config = json.load(f)
 
-    model = STSModel.load_from_checkpoint(f'{model_dir}/model.ckpt')
+    tokenizer = AutoTokenizer.from_pretrained(config['MODEL_NAME'])
+    model = AutoModel.from_pretrained(config['MODEL_NAME'])
+
+    tokens = "<PERSON>"
+    tokenizer.add_tokens(tokens)
+    model.resize_token_embeddings(len(tokenizer))
+
+    model = STSModel(config, model)
+    model.load_state_dict(torch.load(f'{model_dir}/{arg.model_name}.ckpt')["state_dict"])
 
     ## processing
     preprocess = False
@@ -39,7 +50,6 @@ def main(arg):
     test = test.dropna(subset=['sentence_1', 'sentence_2'])
     test = test.reset_index(drop=True)
 
-    tokenizer = AutoTokenizer.from_pretrained(config['MODEL_NAME'])
     dataloader = TextDataLoader(
         tokenizer=tokenizer,
         max_len=config['MAX_LEN'],
@@ -69,18 +79,18 @@ if __name__ == "__main__":
         help="directory path for data (default: None)",
     )
     args.add_argument(
-        "-r",
-        "--run_path",
-        default=None,
-        type=str,
-        help="wandb run path for an experiment (default: None)",
-    )
-    args.add_argument(
         "-m",
         "--model_path",
         default=None,
         type=str,
         help="artifact path for a model (default: all)",
+    )
+    args.add_argument(
+        "-n",
+        "--model_name",
+        default=None,
+        type=str,
+        help="name of the model to call (default: all)",
     )
 
     arg = args.parse_args()
