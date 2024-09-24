@@ -8,8 +8,7 @@ from pytorch_lightning import Trainer
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
 from utils.preprocessing import preprocessing
-from utils.tokenizer import get_tokenizer
-from utils.clean import clean_texts
+from transformers import AutoTokenizer
 
 
 def main(arg):
@@ -33,13 +32,14 @@ def main(arg):
     model = STSModel.load_from_checkpoint(f'{model_dir}/model.ckpt')
 
     ## processing
-    test['sentence_1'] = clean_texts(test['sentence_1'])
-    test['sentence_2'] = clean_texts(test['sentence_2'])
+    preprocess = False
+    if preprocess == True:
+        test = preprocessing(test)
 
     test = test.dropna(subset=['sentence_1', 'sentence_2'])
     test = test.reset_index(drop=True)
 
-    tokenizer = get_tokenizer(config['MODEL_NAME'])
+    tokenizer = AutoTokenizer.from_pretrained(config['MODEL_NAME'])
     dataloader = TextDataLoader(
         tokenizer=tokenizer,
         max_len=config['MAX_LEN'],
@@ -48,8 +48,7 @@ def main(arg):
     )
         
     trainer = Trainer(
-        accelerator="gpu",
-        devices=1
+        accelerator="gpu"
     )
 
     preds = trainer.predict(model, dataloader)

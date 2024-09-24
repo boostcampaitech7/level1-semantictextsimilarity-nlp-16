@@ -13,11 +13,11 @@ parameters:
     values: [64, 128]
   LEARNING_RATE:
     min: 0.0001
-    max: 0.01
+    max: 0.0005
   LORA_RANK:
-    values: [1, 2, 4, 8, 16, 32, 64]
+    values: [8, 16, 32, 64]
   MODEL_NAME:
-    value: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+    value: klue/roberta-large
   MODULE_NAMES:
     value: ['query', 'key', 'value']
   SEED:
