@@ -101,7 +101,7 @@ def main():
     checkpoint_callback = ModelCheckpoint(
         dirpath=f"checkpoints/{MODEL_NAME}/{current_time}_{wandb.run.id}",
         filename="{epoch:02d}-{val_pearson_corr:.4f}",
-        save_top_k=3,
+        save_top_k=1,
         monitor="val_pearson_corr",
         mode="max",
     )
@@ -120,8 +120,9 @@ def main():
     # 학습
     trainer.fit(model, datamodule=dataloader)
 
+    config_dict = dict(config)
     with open("config.json", "w") as f:
-        json.dump(config, f)
+        json.dump(config_dict, f)
 
     artifact = wandb.Artifact(name=f"model-{wandb.run.id}", type="model")
     artifact.add_file(checkpoint_callback.best_model_path)
