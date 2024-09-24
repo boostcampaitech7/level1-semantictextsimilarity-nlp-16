@@ -40,7 +40,7 @@ class TextDataLoader(L.LightningDataModule):
                 tokenizer=self.tokenizer,
                 max_len=self.max_len,
             )
-        if stage == "test":
+        elif stage == "predict":
             self.test_dataset = TestDataset(
                 sentence_1=self.test_data["sentence_1"],
                 sentence_2=self.test_data["sentence_2"],
