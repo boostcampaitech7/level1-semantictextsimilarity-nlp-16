@@ -7,22 +7,22 @@ import pytorch_lightning as L
 import torch
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoModel, AutoTokenizer
 
 import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
-# from utils.preprocessing import preprocessing
+from utils.preprocessing import preprocessing
 from utils.util import set_seed
 
 
 def main():
-    ## call configuration from wandb
     ## initialize wandb
     wandb_logger = WandbLogger(
         log_model='all',
         reinit=True
     )
+    ## call configuration from wandb
     config = wandb_logger.experiment.config
 
     ## parameters
@@ -39,38 +39,40 @@ def main():
     set_seed(SEED)
 
     ## load, preprocess data
+    preprocess = False  # 전처리 데이터 적용시 True로 변경
     data_dir = config["DATA_DIR"]
     train_dir = os.path.join(data_dir, "train.csv")
     dev_dir = os.path.join(data_dir, "dev.csv")
-
-    train = pd.read_csv(train_dir, dtype={'label': np.float32})
-    dev = pd.read_csv(dev_dir, dtype={'label': np.float32})
-
-    # preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
-    # preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
-
-    # if os.path.exists(preprocessed_train_dir) and os.path.exists(preprocessed_dev_dir):
-    #     print("Loading preprocessed files...")
-    #     train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
-    #     dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
-    # else:
-    #     train = pd.read_csv(train_dir, dtype={"label": np.float32})
-    #     dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
-
-    #     print("Preprocessing train data...")
-    #     train = preprocessing(train)
-    #     print(f"Saving preprocessed train data to {preprocessed_train_dir}")
-    #     train.to_csv(preprocessed_train_dir, index=False)
-    #     print("Preprocessing dev data...")
-    #     dev = preprocessing(dev)
-    #     print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
-    #     dev.to_csv(preprocessed_dev_dir, index=False)
+    preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
+    preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
+    if preprocess == True:
+        if os.path.exists(preprocessed_train_dir) and os.path.exists(
+            preprocessed_dev_dir
+        ):
+            print("Loading preprocessed data...")
+            train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
+            dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
+        else:
+            train = pd.read_csv(train_dir, dtype={"label": np.float32})
+            dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
+            print("Preprocessing train data...")
+            train = preprocessing(train)
+            print(f"Saving preprocessed train data to {train_dir}")
+            train.to_csv(preprocessed_train_dir, index=False)
+            print("Preprocessing dev data...")
+            dev = preprocessing(dev)
+            print(f"Saving preprocessed dev data to {dev_dir}")
+            dev.to_csv(preprocessed_dev_dir, index=False)
+    else:
+        print("Loading data...")
+        train = pd.read_csv(train_dir, dtype={"label": np.float32})
+        dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
 
     ## 학습 세팅
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     model = AutoModel.from_pretrained(MODEL_NAME)
 
-    tokens = '<PERSON>'
+    tokens = "<PERSON>"
     tokenizer.add_tokens(tokens)
     model.resize_token_embeddings(len(tokenizer))
 
@@ -91,7 +93,7 @@ def main():
             "MODULE_NAMES": MODULE_NAMES,
             "SEED": SEED,
         },
-        model
+        model,
     )
 
     ## 매 에포크마다 모델 체크포인트를 로컬에 저장
@@ -105,11 +107,7 @@ def main():
     )
 
     ## 얼리스탑 설정
-    early_stop_callback = EarlyStopping(
-        monitor="val_loss",
-        patience=3,
-        mode="min"
-    )
+    early_stop_callback = EarlyStopping(monitor="val_loss", patience=3, mode="min")
 
     trainer = L.Trainer(
         accelerator="gpu",
