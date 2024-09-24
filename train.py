@@ -7,14 +7,12 @@ import pytorch_lightning as L
 import torch
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
-# from utils.util import WandbCheckpointCallback, set_seed
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, AutoModel
 
 import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
-# from utils.clean import clean_texts
-from utils.preprocessing import preprocessing
+# from utils.preprocessing import preprocessing
 from utils.util import set_seed
 
 
@@ -41,28 +39,38 @@ def main():
     data_dir = config["DATA_DIR"]
     train_dir = os.path.join(data_dir, "train.csv")
     dev_dir = os.path.join(data_dir, "dev.csv")
-    preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
-    preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
 
-    if os.path.exists(preprocessed_train_dir) and os.path.exists(preprocessed_dev_dir):
-        print("Loading preprocessed files...")
-        train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
-        dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
-    else:
-        train = pd.read_csv(train_dir, dtype={"label": np.float32})
-        dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
+    train = pd.read_csv(train_dir, dtype={'label': np.float32})
+    dev = pd.read_csv(dev_dir, dtype={'label': np.float32})
 
-        print("Preprocessing train data...")
-        train = preprocessing(train)
-        print(f"Saving preprocessed train data to {preprocessed_train_dir}")
-        train.to_csv(preprocessed_train_dir, index=False)
-        print("Preprocessing dev data...")
-        dev = preprocessing(dev)
-        print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
-        dev.to_csv(preprocessed_dev_dir, index=False)
+    # preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
+    # preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
+
+    # if os.path.exists(preprocessed_train_dir) and os.path.exists(preprocessed_dev_dir):
+    #     print("Loading preprocessed files...")
+    #     train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
+    #     dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
+    # else:
+    #     train = pd.read_csv(train_dir, dtype={"label": np.float32})
+    #     dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
+
+    #     print("Preprocessing train data...")
+    #     train = preprocessing(train)
+    #     print(f"Saving preprocessed train data to {preprocessed_train_dir}")
+    #     train.to_csv(preprocessed_train_dir, index=False)
+    #     print("Preprocessing dev data...")
+    #     dev = preprocessing(dev)
+    #     print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
+    #     dev.to_csv(preprocessed_dev_dir, index=False)
 
     ## 학습 세팅
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    model = AutoModel.from_pretrained(config["MODEL_NAME"])
+
+    tokens = '<PERSON>'
+    tokenizer.add_tokens(tokens)
+    model.resize_token_embeddings(len(tokenizer))
+
     dataloader = TextDataLoader(
         tokenizer=tokenizer,
         max_len=MAX_LEN,
@@ -79,31 +87,38 @@ def main():
             "LORA_RANK": LORA_RANK,
             "MODULE_NAMES": MODULE_NAMES,
             "SEED": SEED,
-        }
+        },
+        model
     )
 
-    wandb_logger = WandbLogger(name=f"{MODEL_NAME}_{LEARNING_RATE}", log_model="best")
+    wandb_logger = WandbLogger(
+        name=f"{MODEL_NAME}_{LEARNING_RATE}",
+        log_model="best"
+    )
 
     ## 매 에포크마다 모델 체크포인트를 로컬에 저장
     current_datetime = datetime.now().strftime("%y%m%d_%H%M%S")
     checkpoint_callback = ModelCheckpoint(
-        dirpath=f"checkpoints/{MODEL_NAME}/{current_datetime}-{wandb.run.id}",
-        filename="{epoch}-{val_pearson_corr:.3f}-{val_loss:.3f}",
-        # save_last=True,
+        dirpath="saved",
+        filename="{epoch:02d}-{val_pearson_corr:.3f}",
         save_top_k=3,
         monitor="val_pearson_corr",
         mode="max",
     )
 
     ## 얼리스탑 설정
-    early_stop_callback = EarlyStopping(monitor="val_loss", patience=5, mode="min")
+    early_stop_callback = EarlyStopping(
+        monitor="val_loss",
+        patience=3,
+        mode="min"
+    )
 
     trainer = L.Trainer(
         accelerator="gpu",
         max_epochs=EPOCHS,
         logger=wandb_logger,
         callbacks=[checkpoint_callback, early_stop_callback],
-        # val_check_interval=1.0,
+        val_check_interval=1.0,
     )
 
     trainer.fit(model, datamodule=dataloader)
