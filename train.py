@@ -4,7 +4,6 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytorch_lightning as L
-import torch
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from transformers import AutoModel, AutoTokenizer
@@ -18,10 +17,7 @@ from utils.util import set_seed
 
 def main():
     ## initialize wandb
-    wandb_logger = WandbLogger(
-        log_model='all',
-        reinit=True
-    )
+    wandb_logger = WandbLogger(log_model="all", reinit=True)
     ## call configuration from wandb
     config = wandb_logger.experiment.config
 
@@ -97,10 +93,10 @@ def main():
     )
 
     ## 매 에포크마다 모델 체크포인트를 로컬에 저장
-    current_datetime = datetime.now().strftime("%y%m%d_%H%M%S")
+    current_time = datetime.now().strftime("%y%m%d_%H%M%S")
     checkpoint_callback = ModelCheckpoint(
-        dirpath="saved",
-        filename="{epoch:02d}-{val_pearson_corr:.3f}",
+        dirpath=f"checkpoints/{MODEL_NAME}/{current_time}_{wandb.run.id}",
+        filename="{epoch:02d}-{val_pearson_corr:.4f}",
         save_top_k=3,
         monitor="val_pearson_corr",
         mode="max",
@@ -117,10 +113,11 @@ def main():
         val_check_interval=1.0,
     )
 
+    # 학습
     trainer.fit(model, datamodule=dataloader)
 
     # artifact = wandb_logger.experiment.wandb.Artifact(
-    #     name=f"model-{wandb_logger.experiment.id}", 
+    #     name=f"model-{wandb_logger.experiment.id}",
     #     type="model"
     # )
     # artifact.add_file(checkpoint_callback.best_model_path)
