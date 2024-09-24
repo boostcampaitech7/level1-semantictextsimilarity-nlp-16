@@ -12,10 +12,10 @@ parameters:
   MAX_LEN:
     values: [64, 128]
   LEARNING_RATE:
-    min: 0.0001
-    max: 0.01
+    min: 0.00001
+    max: 0.001
   LORA_RANK:
-    values: [1, 2, 4, 8, 16, 32, 64]
+    values: [4, 8, 16, 32, 64]
   MODEL_NAME:
     value: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
   MODULE_NAMES:
