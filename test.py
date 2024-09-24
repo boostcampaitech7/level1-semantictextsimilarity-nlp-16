@@ -10,7 +10,7 @@ from transformers import AutoModel, AutoTokenizer
 import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
-from utils.preprocessing import preprocessing
+from utils.preprocessing import preprocess_data
 
 
 def main(arg):
@@ -46,7 +46,7 @@ def main(arg):
     ## processing
     preprocess = False
     if preprocess == True:
-        test = preprocessing(test)
+        test = preprocess_data(test)
 
     test = test.dropna(subset=["sentence_1", "sentence_2"])
     test = test.reset_index(drop=True)
