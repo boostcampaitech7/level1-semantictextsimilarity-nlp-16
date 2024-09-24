@@ -17,10 +17,13 @@ from utils.util import set_seed
 
 
 def main():
-    ## initialize wandb
-    wandb.init()
     ## call configuration from wandb
-    config = wandb.config
+    ## initialize wandb
+    wandb_logger = WandbLogger(
+        log_model='all',
+        reinit=True
+    )
+    config = wandb_logger.experiment.config
 
     ## parameters
     EPOCHS = config["EPOCHS"]
@@ -65,7 +68,7 @@ def main():
 
     ## 학습 세팅
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    model = AutoModel.from_pretrained(config["MODEL_NAME"])
+    model = AutoModel.from_pretrained(MODEL_NAME)
 
     tokens = '<PERSON>'
     tokenizer.add_tokens(tokens)
@@ -89,11 +92,6 @@ def main():
             "SEED": SEED,
         },
         model
-    )
-
-    wandb_logger = WandbLogger(
-        name=f"{MODEL_NAME}_{LEARNING_RATE}",
-        log_model="best"
     )
 
     ## 매 에포크마다 모델 체크포인트를 로컬에 저장
@@ -122,6 +120,13 @@ def main():
     )
 
     trainer.fit(model, datamodule=dataloader)
+
+    # artifact = wandb_logger.experiment.wandb.Artifact(
+    #     name=f"model-{wandb_logger.experiment.id}", 
+    #     type="model"
+    # )
+    # artifact.add_file(checkpoint_callback.best_model_path)
+    # wandb_logger.experiment.log_artifact(artifact)
 
 
 if __name__ == "__main__":
