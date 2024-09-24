@@ -7,7 +7,7 @@ import pytorch_lightning as L
 import torch
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoModel, AutoTokenizer
 
 import wandb
 from data_loader.data_loaders import TextDataLoader
@@ -36,36 +36,40 @@ def main():
     set_seed(SEED)
 
     ## load, preprocess data
-    preprocess = False # 전처리 데이터 적용시 True로 변경
+    preprocess = False  # 전처리 데이터 적용시 True로 변경
     data_dir = config["DATA_DIR"]
+    train_dir = os.path.join(data_dir, "train.csv")
+    dev_dir = os.path.join(data_dir, "dev.csv")
+    preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
+    preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
     if preprocess == True:
-        train_dir = os.path.join(data_dir, "preprocessed_train.csv")
-        dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
-        if os.path.exists(train_dir) and os.path.exists(dev_dir):
-            print("Loading preprocessed files...")
+        if os.path.exists(preprocessed_train_dir) and os.path.exists(
+            preprocessed_dev_dir
+        ):
+            print("Loading preprocessed data...")
+            train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
+            dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
+        else:
             train = pd.read_csv(train_dir, dtype={"label": np.float32})
             dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
-        else:
             print("Preprocessing train data...")
             train = preprocessing(train)
             print(f"Saving preprocessed train data to {train_dir}")
-            train.to_csv(train_dir, index=False)
+            train.to_csv(preprocessed_train_dir, index=False)
             print("Preprocessing dev data...")
             dev = preprocessing(dev)
             print(f"Saving preprocessed dev data to {dev_dir}")
-            dev.to_csv(dev_dir, index=False)
+            dev.to_csv(preprocessed_dev_dir, index=False)
     else:
-        train_dir = os.path.join(data_dir, "train.csv")
-        dev_dir = os.path.join(data_dir, "dev.csv")
+        print("Loading data...")
         train = pd.read_csv(train_dir, dtype={"label": np.float32})
         dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
-    
 
     ## 학습 세팅
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     model = AutoModel.from_pretrained(config["MODEL_NAME"])
 
-    tokens = '<PERSON>'
+    tokens = "<PERSON>"
     tokenizer.add_tokens(tokens)
     model.resize_token_embeddings(len(tokenizer))
 
@@ -86,13 +90,10 @@ def main():
             "MODULE_NAMES": MODULE_NAMES,
             "SEED": SEED,
         },
-        model
+        model,
     )
 
-    wandb_logger = WandbLogger(
-        name=f"{MODEL_NAME}_{LEARNING_RATE}",
-        log_model="best"
-    )
+    wandb_logger = WandbLogger(name=f"{MODEL_NAME}_{LEARNING_RATE}", log_model="best")
 
     ## 매 에포크마다 모델 체크포인트를 로컬에 저장
     current_datetime = datetime.now().strftime("%y%m%d_%H%M%S")
@@ -105,11 +106,7 @@ def main():
     )
 
     ## 얼리스탑 설정
-    early_stop_callback = EarlyStopping(
-        monitor="val_loss",
-        patience=3,
-        mode="min"
-    )
+    early_stop_callback = EarlyStopping(monitor="val_loss", patience=3, mode="min")
 
     trainer = L.Trainer(
         accelerator="gpu",
