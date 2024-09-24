@@ -103,7 +103,7 @@ def main():
         max_epochs=EPOCHS,
         logger=wandb_logger,
         callbacks=[checkpoint_callback, early_stop_callback],
-        # val_check_interval=1.0,
+        val_check_interval=1.0,
     )
 
     trainer.fit(model, datamodule=dataloader)
