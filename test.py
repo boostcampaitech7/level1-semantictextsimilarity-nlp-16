@@ -1,23 +1,22 @@
-import os
-import json
 import argparse
+import json
+import os
 
 import pandas as pd
 import torch
-import wandb
 from pytorch_lightning import Trainer
 from transformers import AutoModel, AutoTokenizer
 
+import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
 from utils.preprocessing import preprocessing
-from transformers import AutoTokenizer
 
 
 def main(arg):
     ## data reading
-    test_dir = os.path.join(arg.data_dir, 'test.csv')
-    submission_dir = os.path.join(arg.data_dir, 'sample_submission.csv')
+    test_dir = os.path.join(arg.data_dir, "test.csv")
+    submission_dir = os.path.join(arg.data_dir, "sample_submission.csv")
 
     test = pd.read_csv(test_dir)
     submission = pd.read_csv(submission_dir)
@@ -28,45 +27,42 @@ def main(arg):
     run = wandb.init()
     artifact = run.use_artifact(arg.model_path)
     model_dir = artifact.download()
-    
-    with open('config.json', 'r') as f:
+
+    with open("config.json", "r") as f:
         config = json.load(f)
 
-    tokenizer = AutoTokenizer.from_pretrained(config['MODEL_NAME'])
-    model = AutoModel.from_pretrained(config['MODEL_NAME'])
+    tokenizer = AutoTokenizer.from_pretrained(config["MODEL_NAME"])
+    model = AutoModel.from_pretrained(config["MODEL_NAME"])
 
     tokens = "<PERSON>"
     tokenizer.add_tokens(tokens)
     model.resize_token_embeddings(len(tokenizer))
 
     model = STSModel(config, model)
-    model.load_state_dict(torch.load(f'{model_dir}/{arg.model_name}.ckpt')["state_dict"])
+    model.load_state_dict(
+        torch.load(f"{model_dir}/{arg.model_name}.ckpt")["state_dict"]
+    )
 
     ## processing
     preprocess = False
     if preprocess == True:
         test = preprocessing(test)
 
-    test = test.dropna(subset=['sentence_1', 'sentence_2'])
+    test = test.dropna(subset=["sentence_1", "sentence_2"])
     test = test.reset_index(drop=True)
 
     dataloader = TextDataLoader(
-        tokenizer=tokenizer,
-        max_len=config['MAX_LEN'],
-        test_data=test,
-        truncation=True
+        tokenizer=tokenizer, max_len=config["MAX_LEN"], test_data=test, truncation=True
     )
-        
-    trainer = Trainer(
-        accelerator="gpu"
-    )
+
+    trainer = Trainer(accelerator="gpu")
 
     preds = trainer.predict(model, dataloader)
     all_pred = [val for pred in preds for val in pred]
-    submission['target'] = all_pred
+    submission["target"] = all_pred
 
     print(submission.head())
-    submission.to_csv('data/submission.csv', index=False)
+    submission.to_csv("data/submission.csv", index=False)
 
 
 if __name__ == "__main__":
