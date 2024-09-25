@@ -81,10 +81,6 @@ def main():
             dev = preprocess_data(dev)
             print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
             dev.to_csv(preprocessed_dev_dir, index=False)
-    else:
-        print("Loading raw data...")
-        train = pd.read_csv(train_dir, dtype={"label": np.float32})
-        dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
 
     ## 데이터 증강과 전처리를 동시 적용할 경우, augmented 데이터 삭제 후 preprocess를 True로 설정 후 적용
     augment = False  # 증강 적용시 True로 설정
