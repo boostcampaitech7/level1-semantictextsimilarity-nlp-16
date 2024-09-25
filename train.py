@@ -94,16 +94,11 @@ def main():
         if os.path.exists(augmented_train_dir) and os.path.exists(augmented_dev_dir):
             print("Loading augmented data...")
             train = pd.read_csv(augmented_train_dir, dtype={"label": np.float32})
-            dev = pd.read_csv(augmented_dev_dir, dtype={"label": np.float32})
         else:
             print("Augmenting train data...")
             train = augment_data(train)
             print(f"Saving augmented train data to {augmented_train_dir}")
             train.to_csv(augmented_train_dir, index=False)
-            print("Augmenting dev data...")
-            dev = augment_data(dev)
-            print(f"Saving augmented dev data to {augmented_dev_dir}")
-            dev.to_csv(augmented_dev_dir, index=False)
 
     ## 학습 세팅
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
