@@ -28,7 +28,7 @@ def main(arg):
     artifact = run.use_artifact(arg.model_path)
     model_dir = artifact.download()
 
-    with open("config.json", "r") as f:
+    with open(f"{model_dir}/config.json", "r") as f:
         config = json.load(f)
 
     tokenizer = AutoTokenizer.from_pretrained(config["MODEL_NAME"])
