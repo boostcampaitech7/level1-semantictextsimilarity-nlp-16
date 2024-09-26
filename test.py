@@ -52,7 +52,7 @@ def main(arg):
     test = test.reset_index(drop=True)
 
     dataloader = TextDataLoader(
-        tokenizer=tokenizer, max_len=config["MAX_LEN"], test_data=test, truncation=True
+        tokenizer=tokenizer, max_len=config["MAX_LEN"], predict_data=test, truncation=True
     )
 
     trainer = Trainer(accelerator="gpu")
