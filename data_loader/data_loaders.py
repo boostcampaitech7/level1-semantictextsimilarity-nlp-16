@@ -39,6 +39,12 @@ class TextDataLoader(L.LightningDataModule):
         self.batch_size = batch_size
 
     def setup(self, stage=None):
+        """_summary_
+        stage별 load할 데이터 정의
+
+        Args:
+            stage (str, optional): 'fit', 'test', 'predict', 기본값은 None
+        """
         if stage == "fit":
             self.train_dataset = TrainDataset(
                 sentence_1=self.train_data["sentence_1"],
