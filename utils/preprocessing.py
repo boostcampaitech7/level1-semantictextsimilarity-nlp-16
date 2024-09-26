@@ -29,9 +29,9 @@ def clean_and_normalize_text(text):
 
 
 # https://github.com/ssut/py-hanspell/issues/47#issue-2047956388
-# def spell_check(text):
-#     result = spell_checker.check(text)
-#     return result.checked
+def spell_check(text):
+    result = spell_checker.check(text)
+    return result.checked
 
 
 def remove_repeat_text(text):
