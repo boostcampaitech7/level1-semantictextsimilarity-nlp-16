@@ -24,12 +24,13 @@ def apply_augment(train, data_dir, augment=False):
     if augment:
         if os.path.exists(augmented_train_dir):
             print("Loading augmented data...")
-            train = pd.read_csv(augmented_train_dir, dtype={"label": np.float32})
+            augmented_train = pd.read_csv(augmented_train_dir, dtype={"label": np.float32})
         else:
             print("Augmenting train data...")
-            train = augment_data(train)
+            augmented_train = augment_data(train)
             print(f"Saving augmented train data to {augmented_train_dir}")
-            train.to_csv(augmented_train_dir, index=False)
+            augmented_train.to_csv(augmented_train_dir, index=False)
+    return augmented_train
 
 
 def random_deletion(text, p=0.2):
@@ -71,5 +72,5 @@ def apply_random_deletion(train):
 
     train_deleted = pd.DataFrame(train_deleted)
     train = pd.concat([train, train_deleted]).drop_duplicates()
-    
+
     return train.reset_index(drop=True, inplace=True)
