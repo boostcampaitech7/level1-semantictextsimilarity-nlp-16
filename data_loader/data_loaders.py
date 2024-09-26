@@ -19,6 +19,7 @@ class TextDataLoader(L.LightningDataModule):
         truncation (bool, optional): 문장 절단 여부
         batch_size (int): 배치 크기
     """
+
     def __init__(
         self,
         tokenizer,

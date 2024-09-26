@@ -1,9 +1,9 @@
 import os
 import re
-import numpy as np
-import pandas as pd
 
 import nltk
+import numpy as np
+import pandas as pd
 from hanspell import spell_checker
 from konlpy.tag import Okt
 from nltk.corpus import stopwords
@@ -90,7 +90,7 @@ def preprocess_data(df):
     return df
 
 
-def apply_preprocess(train ,dev, data_dir, preprocess=False):
+def apply_preprocess(train, dev, data_dir, preprocess=False):
     preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
     preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
     if preprocess == True:
@@ -98,8 +98,12 @@ def apply_preprocess(train ,dev, data_dir, preprocess=False):
             preprocessed_dev_dir
         ):
             print("Loading preprocessed data...")
-            preprocessed_train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
-            preprocessed_dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
+            preprocessed_train = pd.read_csv(
+                preprocessed_train_dir, dtype={"label": np.float32}
+            )
+            preprocessed_dev = pd.read_csv(
+                preprocessed_dev_dir, dtype={"label": np.float32}
+            )
         else:
             print("Preprocessing train data...")
             preprocessed_train = preprocess_data(train)
