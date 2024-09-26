@@ -12,7 +12,7 @@ from transformers import AutoModel, AutoTokenizer
 import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
-from utils.augmentation import augment_data
+from utils.augmentation import apply_augment
 from utils.preprocessing import preprocess_data
 from utils.util import set_seed
 
@@ -82,19 +82,8 @@ def main():
             print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
             dev.to_csv(preprocessed_dev_dir, index=False)
 
-    ## 데이터 증강과 전처리를 동시 적용할 경우, augmented 데이터 삭제 후 preprocess를 True로 설정 후 적용
-    augment = False  # 증강 적용시 True로 설정
-    augmented_train_dir = os.path.join(data_dir, "augmented_train.csv")
-    augmented_dev_dir = os.path.join(data_dir, "augmented_dev.csv")
-    if augment:
-        if os.path.exists(augmented_train_dir) and os.path.exists(augmented_dev_dir):
-            print("Loading augmented data...")
-            train = pd.read_csv(augmented_train_dir, dtype={"label": np.float32})
-        else:
-            print("Augmenting train data...")
-            train = augment_data(train)
-            print(f"Saving augmented train data to {augmented_train_dir}")
-            train.to_csv(augmented_train_dir, index=False)
+    ## Sentence Swap 적용
+    train = apply_augment(train, data_dir, augment=False)
 
     ## 학습 세팅
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -108,7 +97,7 @@ def main():
         tokenizer=tokenizer,
         max_len=MAX_LEN,
         train_data=train,
-        dev_data=dev,
+        val_data=dev,
         truncation=True,
         batch_size=BATCH_SIZE,
     )
