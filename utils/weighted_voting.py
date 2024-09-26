@@ -14,19 +14,15 @@ def main(arg):
     preds = [pd.read_csv(file)[["target"]] for file in all_files]
 
     # 가중치 설정 (예를 들어, 성능에 따라 가중치 부여)
-    weights = [0.3, 0.3, 0.15, 0.15, 0.1]
-
-    w = [0, 0, 0, 0, 0]
-    w_s = sum(w)
-    wei = [i / w_s for i in w]
+    w = [30, 30, 15]
 
     # 가중치 앙상블
-    ensemble_preds = np.average(preds, axis=0, weights=wei)
+    ensemble_preds = np.average(preds, axis=0, weights=w)
 
     # 결과 저장
-    submission = preds[0].copy()
+    submission = pd.read_csv(f'{arg.data_dir}/sample_submission.csv')
     submission["target"] = ensemble_preds
-    submission.to_csv("weighted_voting.csv", index=False)
+    submission.to_csv(f"{path}/ensemble/weighted_voting.csv", index=False)
 
 
 if __name__ == "__main__":
