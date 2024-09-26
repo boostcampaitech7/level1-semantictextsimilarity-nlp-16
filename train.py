@@ -13,7 +13,7 @@ import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
 from utils.augmentation import apply_augment
-from utils.preprocessing import preprocess_data
+from utils.preprocessing import apply_preprocess
 from utils.util import set_seed
 
 
@@ -50,25 +50,7 @@ def main():
     train.reset_index(drop=True, inplace=True)
 
     ## 데이터 전처리
-    preprocess = False  # 전처리 데이터 적용시 True로 변경
-    preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
-    preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
-    if preprocess == True:
-        if os.path.exists(preprocessed_train_dir) and os.path.exists(
-            preprocessed_dev_dir
-        ):
-            print("Loading preprocessed data...")
-            train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
-            dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
-        else:
-            print("Preprocessing train data...")
-            train = preprocess_data(train)
-            print(f"Saving preprocessed train data to {preprocessed_train_dir}")
-            train.to_csv(preprocessed_train_dir, index=False)
-            print("Preprocessing dev data...")
-            dev = preprocess_data(dev)
-            print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
-            dev.to_csv(preprocessed_dev_dir, index=False)
+    train, dev = apply_preprocess(train, dev, data_dir, preprocesss=False)
 
     ## Sentence Swap 적용
     train = apply_augment(train, data_dir, augment=False)
