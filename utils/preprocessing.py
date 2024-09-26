@@ -1,11 +1,14 @@
+import os
 import re
+import numpy as np
+import pandas as pd
 
 import nltk
 from hanspell import spell_checker
 from konlpy.tag import Okt
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from pykospacing import Spacing
+# from pykospacing import Spacing
 from soynlp.normalizer import *
 from tqdm import tqdm
 
@@ -26,9 +29,9 @@ def clean_and_normalize_text(text):
 
 
 # https://github.com/ssut/py-hanspell/issues/47#issue-2047956388
-def spell_check(text):
-    result = spell_checker.check(text)
-    return result.checked
+# def spell_check(text):
+#     result = spell_checker.check(text)
+#     return result.checked
 
 
 def remove_repeat_text(text):
@@ -85,3 +88,25 @@ def preprocess_data(df):
         df[column] = df[column].progress_apply(preprocess_text)
 
     return df
+
+
+def apply_preprocess(train ,dev, data_dir, preprocess=False):
+    preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
+    preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
+    if preprocess == True:
+        if os.path.exists(preprocessed_train_dir) and os.path.exists(
+            preprocessed_dev_dir
+        ):
+            print("Loading preprocessed data...")
+            preprocessed_train = pd.read_csv(preprocessed_train_dir, dtype={"label": np.float32})
+            preprocessed_dev = pd.read_csv(preprocessed_dev_dir, dtype={"label": np.float32})
+        else:
+            print("Preprocessing train data...")
+            preprocessed_train = preprocess_data(train)
+            print(f"Saving preprocessed train data to {preprocessed_train_dir}")
+            preprocessed_train.to_csv(preprocessed_train_dir, index=False)
+            print("Preprocessing dev data...")
+            preprocessed_dev = preprocess_data(dev)
+            print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
+            preprocessed_dev.to_csv(preprocessed_dev_dir, index=False)
+    return preprocessed_train, preprocessed_dev
