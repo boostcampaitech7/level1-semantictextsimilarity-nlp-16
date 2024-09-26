@@ -18,8 +18,8 @@ from utils.util import set_seed
 
 
 def main():
-    wandb_logger = WandbLogger(reinit=True) ## initialize wandb
-    config = wandb_logger.experiment.config ## call configuration from wandb
+    wandb_logger = WandbLogger(reinit=True)  ## initialize wandb
+    config = wandb_logger.experiment.config  ## call configuration from wandb
 
     ## parameters
     EPOCHS = config["EPOCHS"]
@@ -42,7 +42,7 @@ def main():
     dev = pd.read_csv(dev_dir, dtype={"label": np.float32})
 
     ## 이상치 행 삭제
-    with open('utils/filtered_ids.txt', 'r') as f:
+    with open("utils/filtered_ids.txt", "r") as f:
         lines = f.readlines()
     filtered_ids = [line.strip() for line in lines]
 
@@ -59,6 +59,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     model = AutoModel.from_pretrained(MODEL_NAME)
 
+    ## PERSON 토큰 추가
     tokens = "<PERSON>"
     tokenizer.add_tokens(tokens)
     model.resize_token_embeddings(len(tokenizer))
@@ -71,6 +72,7 @@ def main():
         truncation=True,
         batch_size=BATCH_SIZE,
     )
+    
     model = STSModel(
         {
             "MODEL_NAME": MODEL_NAME,

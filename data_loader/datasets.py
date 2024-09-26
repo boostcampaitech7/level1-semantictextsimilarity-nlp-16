@@ -16,6 +16,7 @@ class TrainDataset(Dataset):
         max_len (int): 최대 시퀀스 길이
         truncation (bool, optional): 토큰화 시 문장 절단 여부
     """
+
     def __init__(
         self, sentence_1, sentence_2, labels, tokenizer, max_len, truncation=True
     ):
@@ -67,6 +68,7 @@ class TestDataset(Dataset):
         max_len (int): 최대 시퀀스 길이
         truncation (bool, optional): 토큰화 시 문장 절단 여부
     """
+
     def __init__(self, sentence_1, sentence_2, tokenizer, max_len, truncation=True):
         self.sentence_1 = sentence_1
         self.sentence_2 = sentence_2

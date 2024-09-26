@@ -20,7 +20,7 @@ def main(arg):
     ensemble_preds = np.average(preds, axis=0, weights=w)
 
     # 결과 저장
-    submission = pd.read_csv(f'{arg.data_dir}/sample_submission.csv')
+    submission = pd.read_csv(f"{arg.data_dir}/sample_submission.csv")
     submission["target"] = ensemble_preds
     submission.to_csv(f"{path}/ensemble/weighted_voting.csv", index=False)
 
