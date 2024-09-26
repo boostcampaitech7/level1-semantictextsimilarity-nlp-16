@@ -18,10 +18,8 @@ from utils.util import set_seed
 
 
 def main():
-    ## initialize wandb
-    wandb_logger = WandbLogger(reinit=True)
-    ## call configuration from wandb
-    config = wandb_logger.experiment.config
+    wandb_logger = WandbLogger(reinit=True) ## initialize wandb
+    config = wandb_logger.experiment.config ## call configuration from wandb
 
     ## parameters
     EPOCHS = config["EPOCHS"]
@@ -124,9 +122,10 @@ def main():
         val_check_interval=1.0,
     )
 
-    # 학습
+    ## train and validate
     trainer.fit(model, datamodule=dataloader)
 
+    ## best model & configuration uploading
     config_dict = dict(config)
     with open("config.json", "w") as f:
         json.dump(config_dict, f)
