@@ -3,6 +3,19 @@ from torch.utils.data import Dataset
 
 
 class TrainDataset(Dataset):
+    """_summary_
+    train, validation 데이터셋 클래스
+
+    문장 쌍과 레이블을 포함하고 있으며,
+    문장을 토큰화하여 모델 입력에 적합한 형태로 반환
+    Args:
+        sentence_1 (pd.Series[str]): 입력 문장 1
+        sentence_2 (pd.Series[str]): 입력 문장 2
+        labels (pd.Series[float]): 입력 문장 쌍에 대한 레이블
+        tokenizer: 문장을 토큰화하기 위한 토크나이저
+        max_len (int): 최대 시퀀스 길이
+        truncation (bool, optional): 토큰화 시 문장 절단 여부
+    """
     def __init__(
         self, sentence_1, sentence_2, labels, tokenizer, max_len, truncation=True
     ):
@@ -42,6 +55,18 @@ class TrainDataset(Dataset):
 
 
 class TestDataset(Dataset):
+    """_summary_
+    test 데이터셋 클래스
+
+    문장 쌍을 포함하고 있으며,
+    문장을 토큰화하여 모델 입력에 적합한 형태로 반환
+    Args:
+        sentence_1 (pd.Series[str]): 입력 문장 1
+        sentence_2 (pd.Series[str]): 입력 문장 2
+        tokenizer: 문장을 토큰화하기 위한 토크나이저
+        max_len (int): 최대 시퀀스 길이
+        truncation (bool, optional): 토큰화 시 문장 절단 여부
+    """
     def __init__(self, sentence_1, sentence_2, tokenizer, max_len, truncation=True):
         self.sentence_1 = sentence_1
         self.sentence_2 = sentence_2
