@@ -44,13 +44,13 @@ def main():
     ## 이상치 행 삭제
     with open("utils/filtered_ids.txt", "r") as f:
         lines = f.readlines()
-    filtered_ids = [line.strip() for line in lines]
+    filtered_ids = [int(line.rstrip()) for line in lines]
 
     train.drop(index=filtered_ids, inplace=True)
     train.reset_index(drop=True, inplace=True)
 
     ## 데이터 전처리
-    train, dev = apply_preprocess(train, dev, data_dir, preprocesss=False)
+    train, dev = apply_preprocess(train, dev, data_dir, preprocess=False)
 
     ## Sentence Swap 적용
     train = apply_augment(train, data_dir, augment=False)
