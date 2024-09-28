@@ -7,6 +7,13 @@ import pandas as pd
 
 
 def main(arg):
+    """_summary_
+    predicted label scores에 대해 soft voting 적용
+
+    Args:
+        arg (argparse.Namespace): Command line arguments
+            - data_dir : submission 폴더가 위치한 directory 경로
+    """
     path = os.path.join(arg.data_dir, "submission")
     all_files = glob.glob(os.path.join(path, "*.csv"))
 
