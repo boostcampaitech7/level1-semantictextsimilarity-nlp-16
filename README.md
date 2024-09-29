@@ -20,21 +20,21 @@
 
 ## :computer: 개발/협업 환경
 - 컴퓨팅 환경
-  - V100 서버 (VS code와 SSH로 연결하여 사용)
+	- V100 서버 (VS code와 SSH로 연결하여 사용)
 - 협업 환경
-  - ![notion](https://img.shields.io/badge/Notion-FFFFFF?style=flat-square&logo=Notion&logoColor=black) ![github](https://img.shields.io/badge/Github-181717?style=flat-square&logo=Github&logoColor=white) ![WandB](https://img.shields.io/badge/WeightsandBiases-FFBE00?style=flat-square&logo=WeightsandBiases&logoColor=white)
+  	- ![notion](https://img.shields.io/badge/Notion-FFFFFF?style=flat-square&logo=Notion&logoColor=black) ![github](https://img.shields.io/badge/Github-181717?style=flat-square&logo=Github&logoColor=white) ![WandB](https://img.shields.io/badge/WeightsandBiases-FFBE00?style=flat-square&logo=WeightsandBiases&logoColor=white)
 - 의사소통
-  - ![zoom](https://img.shields.io/badge/Zoom-0B5CFF?style=flat-square&logo=Zoom&logoColor=white)
+  	- ![zoom](https://img.shields.io/badge/Zoom-0B5CFF?style=flat-square&logo=Zoom&logoColor=white)
 
 ## :bookmark_tabs: 데이터 설명
 - 데이터 구성
-  - id : 각 데이터의 index
-  - source : 문장의 출처, (petition, NSMC, slack)
-    - petition : 국민청원 게시판 제목 데이터
-    - NSMC : 네이버 영화 감성 분석 코퍼스
-    - slack : 업스테이지(Upstage) 슬랙 데이터
-  - sentence_1, sentence_2 : 추출한 문장
-  - label : 문장 쌍에 대한 유사도, 0 ~ 5점, 소수점 첫째 자리
+	- id : 각 데이터의 index
+	- source : 문장의 출처, (petition, NSMC, slack)
+		- petition : 국민청원 게시판 제목 데이터
+		- NSMC : 네이버 영화 감성 분석 코퍼스
+		- slack : 업스테이지(Upstage) 슬랙 데이터
+	- sentence_1, sentence_2 : 추출한 문장
+	- label : 문장 쌍에 대한 유사도, 0 ~ 5점, 소수점 첫째 자리
 
 ## :card_index_dividers: 프로젝트 구조
 ```
@@ -78,18 +78,18 @@
 		- data : 오마이가뜨지져스크롸이스트휏 // 오 마이 갓 지저스 스크론 이스트 팬 // 2.6
 		- SEN2의 경우 문장에 대한 이해가 어려움
 		- 사람에게 난해한 문장은 모델에게도 난해할 것이라 생각
-  - prob2. 토큰 추가
-    - data : <PERSON> 에게 너무 쉬워보이는 챌린지네요 // <PERSON>에게는 너무 쉬워 보이는 도전입니다 // 4.0
-    - 토크나이저 마다 을 어떻게 처리할지 모름
-    - 일관된 처리를 위해 토크나이저에 <PERSON>토큰 추가 
-  - prob3. Label score가 애매한 경우
-  	- data : 대통령님 좀 쉬세요 // 대통령님 제발 주무세요 // 1.8
-    - 굉장히 유사한 문장이지만, label 값이 다소 작음
-    - 이러한 데이터를 처리하지 않는다면, 모델이 잘못된 관계를 학습할 위험 존재
-  - prob4. 특수문자 고려
-    - data : 조두순출소반대합니다 // 조두순출소반대합니다!!  // 4.8
-    - 특수 문자 1~2개 차이로 점수 깎이는 경우 존재
-    -  특수 문자를 전부 제거하면, 이러한 차이를 포착할 수 없을 것이라 생각함
+	- prob2. 토큰 추가
+		- data : <PERSON> 에게 너무 쉬워보이는 챌린지네요 // <PERSON>에게는 너무 쉬워 보이는 도전입니다 // 4.0
+		- 토크나이저 마다 을 어떻게 처리할지 모름
+		- 일관된 처리를 위해 토크나이저에 <PERSON>토큰 추가 
+	- prob3. Label score가 애매한 경우
+		- data : 대통령님 좀 쉬세요 // 대통령님 제발 주무세요 // 1.8
+		- 굉장히 유사한 문장이지만, label 값이 다소 작음
+		- 이러한 데이터를 처리하지 않는다면, 모델이 잘못된 관계를 학습할 위험 존재
+	- prob4. 특수문자 고려
+		- data : 조두순출소반대합니다 // 조두순출소반대합니다!!  // 4.8
+		- 특수 문자 1~2개 차이로 점수 깎이는 경우 존재
+		-  특수 문자를 전부 제거하면, 이러한 차이를 포착할 수 없을 것이라 생각함
 - 전처리
 	- 이상치 제거
 		- 직접 데이터를 검수하여 label score가 지나치게 애매한 데이터 삭제
@@ -141,10 +141,10 @@
 - 앙상블
 	- Soft Voting (Weighted Mean) 적용
 		- 가중치 설정 방식
-      - Model Score 직접 반영
-        - validation score 기준으로 산정
-        - score가 높은 모델에 더 높은 가중치를 효과적으로 부여 가능
-        - $w_i = \dfrac{corr_i}{\sum_{i=1}^n corr_i}, \ i : 1,2,,n, \ n : \text{number of seleceted models}$
-      - Naive Method
-        - validation correlation의 소수점 둘째 자리 수를 weight로 설정
-        - 직관적인 weight 설정 가능
+			- Model Score 직접 반영
+				- validation score 기준으로 산정
+				- score가 높은 모델에 더 높은 가중치를 효과적으로 부여 가능
+				- $w_i = \dfrac{corr_i}{\sum_{i=1}^n corr_i}, \ i : 1,2,,n, \ n : \text{number of seleceted models}$
+			- Naive Method
+				- validation correlation의 소수점 둘째 자리 수를 weight로 설정
+				- 직관적인 weight 설정 가능
