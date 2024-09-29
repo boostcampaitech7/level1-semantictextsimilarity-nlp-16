@@ -90,27 +90,17 @@ def preprocess_data(df):
     return df
 
 
-def apply_preprocess(train, dev, data_dir, preprocess=False):
-    preprocessed_train_dir = os.path.join(data_dir, "preprocessed_train.csv")
-    preprocessed_dev_dir = os.path.join(data_dir, "preprocessed_dev.csv")
+def apply_preprocess(df, data_dir, name_for_save, preprocess=False):
+    preprocessed_df_dir = os.path.join(data_dir, name_for_save)
     if preprocess == True:
-        if os.path.exists(preprocessed_train_dir) and os.path.exists(
-            preprocessed_dev_dir
-        ):
-            print("Loading preprocessed data...")
-            preprocessed_train = pd.read_csv(
-                preprocessed_train_dir, dtype={"label": np.float32}
-            )
-            preprocessed_dev = pd.read_csv(
-                preprocessed_dev_dir, dtype={"label": np.float32}
+        if os.path.exists(preprocessed_df_dir):
+            print(f"Loading {name_for_save}...")
+            preprocessed_df = pd.read_csv(
+                preprocessed_df_dir, dtype={"label": np.float32}
             )
         else:
-            print("Preprocessing train data...")
-            preprocessed_train = preprocess_data(train)
-            print(f"Saving preprocessed train data to {preprocessed_train_dir}")
-            preprocessed_train.to_csv(preprocessed_train_dir, index=False)
-            print("Preprocessing dev data...")
-            preprocessed_dev = preprocess_data(dev)
-            print(f"Saving preprocessed dev data to {preprocessed_dev_dir}")
-            preprocessed_dev.to_csv(preprocessed_dev_dir, index=False)
-    return preprocessed_train, preprocessed_dev
+            print("Preprocessing data...")
+            preprocessed_df = preprocess_data(df)
+            print(f"Saving preprocessed data to {preprocessed_df_dir}")
+            preprocessed_df.to_csv(preprocessed_df_dir, index=False)
+    return preprocessed_df
