@@ -50,7 +50,9 @@ def main():
     train.reset_index(drop=True, inplace=True)
 
     ## 데이터 전처리
-    train, dev = apply_preprocess(train, dev, data_dir, preprocess=False)
+    preprocess=False
+    train = apply_preprocess(train, data_dir, "preprocessed_train.csv", preprocess)
+    dev = apply_preprocess(dev, data_dir, "preprocessed_dev.csv", preprocess)
 
     ## Sentence Swap 적용
     train = apply_augment(train, data_dir, augment=False)
