@@ -116,4 +116,6 @@ def apply_preprocess(df, data_dir, name_for_save, preprocess=False):
             preprocessed_df = preprocess_data(df)
             print(f"Saving preprocessed data to {preprocessed_df_dir}")
             preprocessed_df.to_csv(preprocessed_df_dir, index=False)
-    return preprocessed_df
+        return preprocessed_df
+    else:
+        return df

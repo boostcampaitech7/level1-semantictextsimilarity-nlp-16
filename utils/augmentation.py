@@ -55,7 +55,9 @@ def apply_augment(train, data_dir, augment=False):
             augmented_train = augment_data(train)
             print(f"Saving augmented train data to {augmented_train_dir}")
             augmented_train.to_csv(augmented_train_dir, index=False)
-    return augmented_train
+        return augmented_train
+    else:
+        return train
 
 
 def random_deletion(text, p=0.2):
