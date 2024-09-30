@@ -97,7 +97,7 @@ def main():
         mode="max",
     )
 
-    ## 얼리스탑 설정
+    ## earlystop 설정
     early_stop_callback = EarlyStopping(monitor="val_loss", patience=3, mode="min")
 
     trainer = L.Trainer(
