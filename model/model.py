@@ -23,6 +23,7 @@ class STSModel(L.LightningModule):
         loss (nn.MSELoss): Mean Squared Error loss
         lr (float): learning rate
     """
+
     def __init__(self, config, model):
         super().__init__()
         self.save_hyperparameters(config)

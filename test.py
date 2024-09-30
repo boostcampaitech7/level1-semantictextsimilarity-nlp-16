@@ -4,10 +4,10 @@ import os
 
 import pandas as pd
 import torch
+import wandb
 from pytorch_lightning import Trainer
 from transformers import AutoModel, AutoTokenizer
 
-import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
 from utils.preprocessing import apply_preprocess
@@ -44,7 +44,7 @@ def main(arg):
     )
 
     ## processing
-    preprocess=False
+    preprocess = False
     test = apply_preprocess(test, arg.data_dir, "preprocessed_test.csv", preprocess)
 
     test = test.dropna(subset=["sentence_1", "sentence_2"])
