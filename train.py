@@ -5,11 +5,11 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytorch_lightning as L
+import wandb
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from transformers import AutoModel, AutoTokenizer
 
-import wandb
 from data_loader.data_loaders import TextDataLoader
 from model.model import STSModel
 from utils.augmentation import apply_augment
@@ -50,7 +50,7 @@ def main():
     train.reset_index(drop=True, inplace=True)
 
     ## 데이터 전처리
-    preprocess=False
+    preprocess = False
     train = apply_preprocess(train, data_dir, "preprocessed_train.csv", preprocess)
     dev = apply_preprocess(dev, data_dir, "preprocessed_dev.csv", preprocess)
 
@@ -74,7 +74,7 @@ def main():
         truncation=True,
         batch_size=BATCH_SIZE,
     )
-    
+
     model = STSModel(
         {
             "MODEL_NAME": MODEL_NAME,
