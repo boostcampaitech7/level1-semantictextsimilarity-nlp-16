@@ -13,6 +13,7 @@
 ## :family_man_man_boy_boy: 멤버 소개
 |강경준|김재겸|원호영|유선우|
 |:---:|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/da281cf3-b2cc-4022-ae9e-68ed6c174cd7" alt="KKJ" width="1000" height="250"> | <img src="https://github.com/user-attachments/assets/5ecd2475-eb8c-4662-bed0-59ae27cc2e0c" alt="KJK" width="1000" height="250"> | <img src="https://github.com/user-attachments/assets/e02832ae-f1fa-4b4f-a7e9-fcc511c727e7" alt="WHY" width="1000" height="250"> | <img src="https://github.com/user-attachments/assets/d58b7d68-ef8e-4a12-ae6e-0d50458e0c5b" alt="YSW" width="1000" height="250"> |
 
 ## :balance_scale: 역할 분담
 |팀원| 역할 |
