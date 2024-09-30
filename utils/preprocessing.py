@@ -8,27 +8,24 @@ from hanspell import spell_checker
 from konlpy.tag import Okt
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-# from pykospacing import Spacing
+from pykospacing import Spacing
 from soynlp.normalizer import *
 from tqdm import tqdm
 
 # nltk.download("punkt_tab")
 # nltk.download("punkt")
-nltk.download("stopwords")
+# nltk.download("stopwords")
 
 
 def clean_and_normalize_text(text):
-    # <PERSON> 토큰을 전처리 과정에서 보호
     text = re.sub(r"<PERSON>", "PERSONTOKEN", text)
     text = text.lower()
     text = re.sub(r"[^a-zㄱ-ㅎ가-힣0-9\s?!;]", "", text)
-    # 보호했던 <PERSON> 토큰을 복원
     text = re.sub(r"persontoken", "<PERSON>", text)
     text = re.sub(r"[!?;]+", lambda m: m.group(0)[0], text)
     return text
 
 
-# https://github.com/ssut/py-hanspell/issues/47#issue-2047956388
 def spell_check(text):
     result = spell_checker.check(text)
     return result.checked
@@ -54,10 +51,10 @@ def remove_english_stopwords(text):
 
 
 def remove_korean_stopwords(text):
-    okt = Okt()  # https://konlpy.org/ko/latest/install/
+    okt = Okt()
     stop_words = open_textfile("./utils/korean_stopwords.txt")
     stop_words = set(word_tokenize(stop_words))
-    word_tokens = okt.morphs(text)  # 형태소 분석
+    word_tokens = okt.morphs(text)
     result = [word for word in word_tokens if not word in stop_words]
     return " ".join(result)
 
@@ -72,7 +69,7 @@ def remove_stopwords(text, remove_english_stop=False, remove_korean_stop=False):
 
 def preprocess_text(text):
     text = clean_and_normalize_text(text)
-    # text = Spacing()(text)  # Uncomment if needed
+    # text = Spacing()(text)
     text = spell_check(text)
     text = remove_repeat_text(text)
     # text = remove_stopwords(text, remove_english_stop=False, remove_korean_stop=False)
@@ -91,6 +88,22 @@ def preprocess_data(df):
 
 
 def apply_preprocess(df, data_dir, name_for_save, preprocess=False):
+    """_summary_
+    dataframe에 preprocess를 적용
+
+    data directory에 preprocessed data가 존재하는지 확인하고,
+    없는 경우에만 preprocessing 적용 및 전처리된 data를 csv로 생성
+    bool type의 preprocess argument를 통해 preprocessing 적용 여부 결정
+
+    Args:
+        df (pd.DataFrame): input dataset
+        data_dir (str): data directory 경로
+        name_for_save (str): data 저장 파일명
+        preprocess (bool, optional): preprocess 적용 여부
+
+    Returns:
+        preprocessed_df (pd.DataFrame): preprocess 적용된 dataframe
+    """
     preprocessed_df_dir = os.path.join(data_dir, name_for_save)
     if preprocess == True:
         if os.path.exists(preprocessed_df_dir):
